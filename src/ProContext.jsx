@@ -19,7 +19,7 @@ export function ProProvider({ children }) {
             // Check if current theme is premium
             const currentThemeData = THEMES.find(t => t.id === theme)
             if (currentThemeData && currentThemeData.premium) {
-                console.log("[ProProvider] Pro revoked. Resetting premium theme to default (dark).")
+               
                 setTheme('dark')
             }
         }

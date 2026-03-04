@@ -114,13 +114,13 @@ export default function Notes({ user, updateUser }) {
     }
 
     const deleteNote = (id) => {
-        console.log(`[Notes] Intentando borrar nota: ${id}`)
+      
         if (!id) return
         if (!confirm('¿Seguro que quieres borrar esta página y todo su contenido?')) return
 
         setNotes(prev => {
             const next = prev.filter(n => n.id !== id)
-            console.log(`[Notes] Nota borrada. Quedan ${next.length} notas.`)
+            
             return next
         })
 

@@ -3,7 +3,7 @@ import { ArrowRight, Terminal, Plus, X, Check, Flame } from 'lucide-react'
 
 const metrics = [
     { value: '10', label: 'Herramientas integradas' },
-    { value: '100%', label: 'Funciona offline' },
+    { value: 'GRATIS', label: 'Con limitaciones' },
     { value: 'PRO', label: 'Plan Gratis & Premium' },
 ]
 

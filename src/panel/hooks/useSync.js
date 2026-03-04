@@ -57,7 +57,7 @@ export function useSync() {
         if (!navigator.onLine || !auth.currentUser || isSyncing || isQuotaExceeded) return
 
         setIsSyncing(true)
-        console.log(`[Sync] Ciclo (${type}) en marcha...`)
+       
 
         try {
             const userId = auth.currentUser.uid
@@ -102,7 +102,7 @@ export function useSync() {
             localStorage.setItem('sd_last_sync', now)
             setLastSync(now)
             setIsDirty(false)
-            console.log("[Sync] Sincronización inteligente completa ✓")
+           
             window.dispatchEvent(new Event('sd_sync_update'))
         } catch (error) {
             if (error.code === 'permission-denied') {

@@ -45,7 +45,7 @@ export default function NoteShare({ noteId }) {
                 const noteRef = doc(db, 'shared_notes', String(noteId))
                 const snap = await getDoc(noteRef)
                 if (snap.exists()) {
-                    console.log("[NoteShare] Nota encontrada:", snap.id)
+                  
                     setNote({ id: snap.id, ...snap.data() })
                 } else {
                     console.warn("[NoteShare] La nota no existe en Firestore:", noteId)

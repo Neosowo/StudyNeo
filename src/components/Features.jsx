@@ -1,12 +1,7 @@
 import { HardDrive, Layers, Zap, CheckCircle2, ArrowRight } from 'lucide-react'
 
 const features = [
-    {
-        icon: HardDrive,
-        title: 'Sin conexión requerida',
-        description: 'Tus notas, tareas y sesiones se guardan en tu dispositivo. StudyNeo funciona completamente offline.',
-        tag: 'Offline-first',
-    },
+
     {
         icon: Layers,
         title: 'Ecosistema unificado',
@@ -38,7 +33,7 @@ export default function Features({ onAcceder }) {
                             Eliminamos el ruido para que solo te preocupes de aprender.
                         </p>
                         <div className="features-checks">
-                            {['Uso Gratuito Generoso', 'Plan Pro Ilimitado ($5)', 'Datos 100% tuyos', 'Acceso Offline (Solo Pro)'].map(item => (
+                            {['Uso Gratuito', 'Plan Pro Ilimitado ($5)', 'Datos 100% seguros', 'Acceso Offline (Solo Pro)'].map(item => (
                                 <div key={item} className="feature-check" style={{ color: 'var(--text-2)', fontSize: '0.9375rem', fontWeight: 500 }}>
                                     <CheckCircle2 size={15} color={item.includes('Pro') ? '#10b981' : 'var(--accent)'} style={{ flexShrink: 0 }} />
                                     {item}

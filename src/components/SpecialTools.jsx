@@ -126,9 +126,7 @@ export default function SpecialTools({ onAcceder }) {
                         <h3 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, color: 'var(--text-1)' }}>
                             ¿Listo para estudiar<br />de verdad?
                         </h3>
-                        <p style={{ color: 'var(--text-2)', fontSize: '15px', fontWeight: 500 }}>
-                            Sin tarjeta. Empieza en menos de 30 segundos.
-                        </p>
+
                     </div>
                     <button onClick={onAcceder} className="cta-btn" id="cta-crear-cuenta-btn">
                         Crear cuenta gratis
