@@ -537,6 +537,7 @@ export function AudioPlayerProvider({ children }) {
 
             if (isAd) {
                 // --- AD DETECTED ---
+                setAdDetected(true)
                 if (!adMuted.current) {
                     // 1. Mute immediately so user doesn't hear it
                     try { p.mute() } catch { }
@@ -549,6 +550,7 @@ export function AudioPlayerProvider({ children }) {
                 } catch { }
             } else {
                 // --- REAL VIDEO ---
+                setAdDetected(false)
                 if (adMuted.current) {
                     // Restore volume after ad
                     try { p.unMute(); p.setVolume(volume) } catch { }

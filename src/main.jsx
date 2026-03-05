@@ -11,7 +11,7 @@ document.documentElement.setAttribute('data-theme', savedTheme)
 // Register Service Worker for Ad-Blocking
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('./sw.js')
       .then(reg => console.log('🛡️ Ad-Blocker SW Registrado'))
       .catch(err => console.log('⚠️ SW Error:', err));
   });

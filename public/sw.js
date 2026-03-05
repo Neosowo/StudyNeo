@@ -4,6 +4,7 @@ const AD_DOMAINS = [
     'pagead2.googlesyndication.com',
     'www.googleadservices.com',
     'adservice.google.com',
+    'youtube.com/pagead',
     'youtube.com/api/stats/ads',
     'youtube.com/ptracking',
     'youtube.com/api/stats/qoe',
@@ -24,7 +25,22 @@ self.addEventListener('fetch', (event) => {
 
     if (isAd) {
         console.log('🛡️ StudyNeo Shield: Bloqueando petición de anuncio:', url);
-        event.respondWith(new Response('', { status: 403, statusText: 'Blocked by StudyNeo' }));
+
+        // Responder con 204 No Content para silenciar errores de consola
+        // y añadir cabeceras CORS para evitar el error de "wildcard vs include credentials"
+        const origin = event.request.headers.get('origin');
+        const headers = {
+            'Access-Control-Allow-Origin': origin || '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Credentials': 'true',
+            'Cache-Control': 'no-store'
+        };
+
+        event.respondWith(new Response(null, {
+            status: 204,
+            statusText: 'No Content (Blocked by StudyNeo)',
+            headers
+        }));
         return;
     }
 

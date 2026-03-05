@@ -38,7 +38,7 @@ function SCEmbed({ url }) {
 }
 
 /* ─── Mini Now Playing Card ─── */
-function NowPlayingCard({ current, playing, onToggle, onNext, onPrev, progress, duration, onSeek, volume, onVolume }) {
+function NowPlayingCard({ current, playing, onToggle, onNext, onPrev, progress, duration, onSeek, volume, onVolume, adDetected, onForceSkipAd }) {
     if (!current) return null
     const thumb = current.thumbnail || `https://img.youtube.com/vi/${current.videoId}/mqdefault.jpg`
     const fmtTime = s => { const t = Math.round(s || 0); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}` }
@@ -66,14 +66,31 @@ function NowPlayingCard({ current, playing, onToggle, onNext, onPrev, progress, 
                     )}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontWeight: 900, fontSize: '0.9375rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '3px' }}>
-                        {current.title || 'Cargando…'}
-                    </p>
-                    <p style={{ fontSize: '0.8125rem', color: 'var(--text-3)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {current.author || current.uploader || ''}
-                    </p>
+                    {adDetected ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 10px', background: '#ff4b2b', borderRadius: '8px', color: 'white', animation: 'pulse 2s infinite' }}>
+                            <Zap size={13} fill="white" />
+                            <p style={{ fontWeight: 900, fontSize: '0.75rem', letterSpacing: '0.02em' }}>ANUNCIO BLOQUEADO</p>
+                        </div>
+                    ) : (
+                        <>
+                            <p style={{ fontWeight: 900, fontSize: '0.9375rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '3px' }}>
+                                {current.title || 'Cargando…'}
+                            </p>
+                            <p style={{ fontSize: '0.8125rem', color: 'var(--text-3)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {current.author || current.uploader || ''}
+                            </p>
+                        </>
+                    )}
                 </div>
             </div>
+
+            {adDetected && (
+                <button
+                    onClick={onForceSkipAd}
+                    style={{ width: '100%', padding: '10px', borderRadius: '12px', background: 'var(--accent)', color: 'white', border: 'none', fontWeight: 900, fontSize: '0.8125rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <SkipForward size={14} fill="white" /> Saltar anuncio manualmente
+                </button>
+            )}
 
             {/* Progress bar */}
             <div>
@@ -195,7 +212,7 @@ export default function MusicPlayer() {
         queue, current, idx, playing, volume, progress, duration,
         togglePlay, nextTrack, prevTrack, seek, setVolume,
         addTrack, removeTrack, clearQueue, playTrackNow,
-        isLiked, toggleLike
+        isLiked, toggleLike, adDetected, forceSkipAd
     } = useAudioPlayer()
 
     /* ── Spotify connect ── */
@@ -369,6 +386,8 @@ export default function MusicPlayer() {
                                 onSeek={seek}
                                 volume={volume}
                                 onVolume={setVolume}
+                                adDetected={adDetected}
+                                onForceSkipAd={forceSkipAd}
                             />
                         </div>
                     )}
