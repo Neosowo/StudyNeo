@@ -436,6 +436,7 @@ export function AudioPlayerProvider({ children }) {
 
         ytRef.current = new window.YT.Player('yt-hidden-player', {
             height: '1', width: '1',
+            host: 'https://www.youtube-nocookie.com', // Privacy Enhanced Mode — reduces/eliminates ads
             videoId: isPlaylist ? '' : payload.videoId,
             playerVars,
             events: {
