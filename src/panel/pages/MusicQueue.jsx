@@ -285,6 +285,7 @@ function QueueItem({ track, index, isActive, onPlay, onRemove, isLiked, onLike, 
    MAIN PAGE
 ───────────────────────────────────────────────────────────── */
 export default function MusicQueue({ user }) {
+    const isMobile = window.innerWidth < 768
     const { isPro, proInfo, trialExpired, startTrial } = useProContext()
     const [showUpgrade, setShowUpgrade] = useState(false)
     const { openWidget } = useWidgets()
@@ -369,13 +370,13 @@ export default function MusicQueue({ user }) {
     }
 
     return (
-        <div className="page-container">
+        <div className="page-container" style={{ padding: isMobile ? '10px' : '20px' }}>
             {showUpgrade && <ProUpgradeModal onClose={() => setShowUpgrade(false)} />}
 
             {/* ── Header ── */}
-            <div className="page-header" style={{ marginBottom: '1.5rem' }}>
-                <div>
-                    <h1 className="page-title">Music Player</h1>
+            <div className="page-header" style={{ marginBottom: isMobile ? '1rem' : '1.5rem', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? '0.75rem' : '1.5rem' }}>
+                <div style={{ minWidth: 0, width: '100%' }}>
+                    <h1 className="page-title" style={{ fontSize: isMobile ? '1.5rem' : '2rem' }}>Music Player</h1>
                     <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.5rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-4)' }}>
                         {current ? `▶ ${current.title}` : `${queue.length} pistas en cola`}
                     </p>
@@ -384,14 +385,16 @@ export default function MusicQueue({ user }) {
                 {/* Trial Time Left Indicator */}
                 {!isPro && proInfo?.trialStartedAt && !trialExpired && (
                     <div style={{
-                        padding: '8px 16px',
+                        padding: '6px 12px',
                         borderRadius: 12,
                         background: 'var(--accent-dim)',
                         border: '1px solid var(--accent-border)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: 10,
-                        transition: 'all 0.3s'
+                        transition: 'all 0.3s',
+                        width: isMobile ? '100%' : 'auto',
+                        justifyContent: isMobile ? 'center' : 'flex-start'
                     }}>
                         <Zap size={14} color="var(--accent)" className="spin" />
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -402,7 +405,12 @@ export default function MusicQueue({ user }) {
                 )}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: '1.5rem', alignItems: 'start' }}>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) 320px',
+                gap: '1.5rem',
+                alignItems: 'start'
+            }}>
 
                 {/* ── Left: Now Playing + Tabs ── */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -421,10 +429,18 @@ export default function MusicQueue({ user }) {
                     )}
 
                     {/* Tabs - Only show all if not expired */}
-                    <div style={{ display: 'flex', background: 'var(--bg-hover)', padding: 4, borderRadius: 12, border: '1px solid var(--border-subtle)', gap: 4 }}>
+                    <div style={{
+                        display: 'flex',
+                        background: 'var(--bg-hover)',
+                        padding: 4,
+                        borderRadius: 12,
+                        border: '1px solid var(--border-subtle)',
+                        gap: 4,
+                        flexWrap: isMobile ? 'wrap' : 'nowrap'
+                    }}>
                         {[
-                            ['queue', `🎵 Cola (${queue.length})`],
-                            ['playlists', `📋 Playlists (${userPlaylists.length})`],
+                            ['queue', `🎵 Cola`],
+                            ['playlists', `📋 Playlists`],
                             ['likes', `❤️ Favoritos`],
                             ['spotify', 'Spotify'],
                         ].filter(([id]) => !trialExpired || id === 'spotify').map(([id, label]) => {
@@ -432,7 +448,7 @@ export default function MusicQueue({ user }) {
                                 <button key={id}
                                     onClick={() => setTab(id)}
                                     style={{
-                                        flex: 1,
+                                        flex: isMobile ? '1 1 45%' : 1,
                                         padding: '7px 0',
                                         borderRadius: 9,
                                         border: 'none',

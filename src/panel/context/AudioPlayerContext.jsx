@@ -384,11 +384,13 @@ export function AudioPlayerProvider({ children }) {
     // Custom Playlists
     const [userPlaylists, setUserPlaylistsSt] = useState(() => readLS(PLAYLISTS_KEY, []))
 
-    const ytRef = useRef(null)  // YT.Player instance
+    const ytRef = useRef(null)         // Active YT.Player instance
+    const shadowRef = useRef(null)     // Preload YT.Player instance
     const ytReady = useRef(false)
     const progTimer = useRef(null)
     const infoTimer = useRef(null)
-    const pendingRef = useRef(null)  // { type, id } queued before API loads
+    const preloadHandled = useRef(null) // ID of track currently preloading
+    const pendingRef = useRef(null)
     const currentIdxRef = useRef(idx)
     const intendedVideoId = useRef(null)  // The video we SHOULD be playing (for ad detection)
     const adMuted = useRef(false)          // Track if we muted because of an ad
@@ -511,6 +513,16 @@ export function AudioPlayerProvider({ children }) {
             const p = ytRef.current; if (!p?.getCurrentTime) return
             const t = p.getCurrentTime(), d = p.getDuration() || 1
             setDuration(d); setProgress((t / d) * 100)
+
+            // PRELOAD LOGIC: 30 seconds before end
+            if (d > 0 && (d - t < 30) && !preloadHandled.current) {
+                const q = readLS(QUEUE_KEY, [])
+                const nextIdx = currentIdxRef.current + 1 < q.length ? currentIdxRef.current + 1 : 0
+                const nextTrack = q[nextIdx]
+                if (nextTrack && nextTrack.videoId && nextTrack.id !== currentIdxRef.current.id) {
+                    _preloadNext(nextTrack)
+                }
+            }
         }, 1000)
 
         // Ad detection + auto-skip/mute
@@ -556,6 +568,38 @@ export function AudioPlayerProvider({ children }) {
         }, 500) // Check every 500ms for fast ad detection
     }, [volume])
     const _stopTimers = useCallback(() => { clearInterval(progTimer.current); clearInterval(infoTimer.current) }, [])
+
+    /* ── Shadow Preloader ──────────────────────────────────── */
+    const _preloadNext = useCallback(track => {
+        if (!track.videoId || preloadHandled.current === track.id) return
+        preloadHandled.current = track.id
+        console.log('🕒 Shadow Preload starting for:', track.title)
+
+        if (shadowRef.current) {
+            try { shadowRef.current.destroy() } catch (e) { }
+            shadowRef.current = null
+        }
+
+        shadowRef.current = new window.YT.Player('yt-shadow-player', {
+            height: '1', width: '1',
+            host: 'https://www.youtube-nocookie.com',
+            videoId: track.videoId,
+            playerVars: { autoplay: 1, mute: 1, controls: 0, playsinline: 1 },
+            events: {
+                onReady: e => {
+                    e.target.mute()
+                    e.target.playVideo()
+                },
+                onStateChange: e => {
+                    // Let the ad play in shadow if any
+                    const S = window.YT.PlayerState
+                    if (e.data === S.PLAYING) {
+                        console.log('✅ Shadow ready (ad passed or no ad)')
+                    }
+                }
+            }
+        })
+    }, [])
 
     /* ── Advance to next queue item ──────────────────────────── */
     const _advanceQueue = useCallback(() => {
@@ -631,6 +675,26 @@ export function AudioPlayerProvider({ children }) {
             _resolveFullTrack(nextTrack).catch(() => { })
         }
 
+        // If we have a shadow player ready for this track, SWAP THEM
+        if (shadowRef.current && preloadHandled.current === track.id) {
+            console.log('⚡ Swapping Shadow to Active')
+            if (ytRef.current) {
+                try { ytRef.current.destroy() } catch (e) { }
+            }
+            // Move shadow to ytRef
+            ytRef.current = shadowRef.current
+            shadowRef.current = null
+            preloadHandled.current = null
+
+            // Unmute and sync volume
+            ytRef.current.unMute()
+            ytRef.current.setVolume(volume)
+            setLoading(false); setPlaying(true)
+            _startTimers()
+            return
+        }
+
+        preloadHandled.current = null
         if (track && (track.videoId || track.platform === 'youtube')) {
             const payload = track.type === 'playlist'
                 ? { type: 'playlist', playlistId: track.playlistId }
@@ -915,6 +979,7 @@ export function AudioPlayerProvider({ children }) {
         }}>
             <div style={{ position: 'fixed', width: 1, height: 1, opacity: 0, pointerEvents: 'none', zIndex: -1 }}>
                 <div id="yt-hidden-player" />
+                <div id="yt-shadow-player" />
             </div>
             {children}
         </AudioCtx.Provider>
