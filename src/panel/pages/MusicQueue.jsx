@@ -422,7 +422,7 @@ export default function MusicQueue({ user }) {
             }}>
 
                 {/* ── Left: Now Playing + Tabs ── */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: 0 }}>
                     {/* Now Playing - Hidden if expired */}
                     {!trialExpired && (
                         <div className="panel-card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -677,7 +677,7 @@ export default function MusicQueue({ user }) {
                 </div>
 
                 {/* ── Right: Add + queue preview ── */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: 0 }}>
                     {/* Add track - Hidden if expired */}
                     {!trialExpired && (
                         <div className="panel-card">

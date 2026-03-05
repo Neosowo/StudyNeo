@@ -4479,7 +4479,7 @@ body {
   div[style*="display: grid"][style*="grid-template-columns: minmax"],
   .dashboard-stats-grid,
   .pomo-info-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 12px !important;
   }
 
