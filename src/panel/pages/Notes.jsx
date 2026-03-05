@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import {
     Plus, Trash2, Search, FileText, X, Save, Share2, Globe, Lock, Copy, Check, History, Link as LinkIcon,
     Bold as BoldIcon, Italic as ItalicIcon, Code as CodeIcon, Trash, Zap,
-    Edit3, Lightbulb, Calendar, Book, Target, Flame, Monitor, FlaskConical, Palette, Rocket, Star, Sprout
+    Edit3, Lightbulb, Calendar, Book, Target, Flame, Monitor, FlaskConical, Palette, Rocket, Star, Sprout, ChevronRight
 } from 'lucide-react'
 import { db } from '../../firebase'
 import { doc, setDoc, deleteDoc, getDoc } from 'firebase/firestore'
@@ -27,12 +27,19 @@ export default function Notes({ user, updateUser }) {
     const [copied, setCopied] = useState(false)
     const [historyOpen, setHistoryOpen] = useState(false)
     const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, hasSelection: false })
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
+
+    useEffect(() => {
+        const h = () => setIsMobile(window.innerWidth < 1024)
+        window.addEventListener('resize', h)
+        return () => window.removeEventListener('resize', h)
+    }, [])
 
     const editorRef = useRef(null)
     const activeNote = notes.find(n => n.id === activeId)
 
     const filtered = notes.filter(n =>
-        n.title.toLowerCase().includes(search.toLowerCase()) ||
+        (n.title || '').toLowerCase().includes(search.toLowerCase()) ||
         (n.body || '').toLowerCase().includes(search.toLowerCase())
     )
 
@@ -224,7 +231,7 @@ export default function Notes({ user, updateUser }) {
     }, [])
 
     return (
-        <div className="notes-layout" style={{ background: 'var(--bg-base)' }}>
+        <div className={`notes-layout ${isMobile && activeId ? 'has-active' : ''}`} style={{ background: 'var(--bg-base)' }}>
             {showUpgrade && <ProUpgradeModal onClose={() => setShowUpgrade(false)} />}
             <div className="notes-list" style={{ borderRight: '1px solid var(--border-subtle)', background: 'var(--bg-surface)' }}>
                 <div className="notes-list-header" style={{ padding: '1.25rem 1rem 0.5rem' }}>
@@ -290,16 +297,23 @@ export default function Notes({ user, updateUser }) {
                     >
                         <div style={{
                             position: 'sticky', top: 0, zIndex: 100,
-                            display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             padding: '0.625rem 1.5rem', gap: '0.75rem',
                             background: 'var(--bg-base)', borderBottom: '1px solid var(--border-subtle)'
                         }}>
-                            <button className="btn-ghost-sm" onClick={() => setHistoryOpen(!historyOpen)} style={{ opacity: 0.7 }}>
-                                <History size={15} />
-                            </button>
-                            <button className="btn-ghost-sm" onClick={() => setShowShare(true)} style={{ gap: '6px', fontSize: '12px', fontWeight: 700 }}>
-                                <Share2 size={14} /> Compartir
-                            </button>
+                            {isMobile && (
+                                <button className="btn-ghost-sm" onClick={() => setActiveId(null)} style={{ marginRight: 'auto', background: 'var(--bg-hover)', color: 'var(--text-1)', padding: '6px 14px' }}>
+                                    <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} /> Volver
+                                </button>
+                            )}
+                            <div style={{ display: 'flex', gap: '0.5rem', marginLeft: 'auto' }}>
+                                <button className="btn-ghost-sm" onClick={() => setHistoryOpen(!historyOpen)} style={{ opacity: 0.7 }}>
+                                    <History size={15} />
+                                </button>
+                                <button className="btn-ghost-sm" onClick={() => setShowShare(true)} style={{ gap: '6px', fontSize: '12px', fontWeight: 700 }}>
+                                    <Share2 size={14} /> Compartir
+                                </button>
+                            </div>
                             {dirty && (
                                 <button className="btn-accent-sm" onClick={saveNote} style={{ borderRadius: '8px', padding: '6px 16px', fontSize: '12px' }}>
                                     Guardar cambios

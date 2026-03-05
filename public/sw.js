@@ -24,7 +24,7 @@ self.addEventListener('fetch', (event) => {
     const isAd = AD_DOMAINS.some(domain => url.includes(domain));
 
     if (isAd) {
-        console.log('🛡️ StudyNeo Shield: Bloqueando petición de anuncio:', url);
+     
 
         // Responder con 204 No Content para silenciar errores de consola
         // y añadir cabeceras CORS para evitar el error de "wildcard vs include credentials"

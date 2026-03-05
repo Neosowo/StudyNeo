@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Plus, Trash2, Flame, Check, X, Zap, Book, Activity, Wind, Droplets, PersonStanding, PenTool, Target, Moon, Apple, BookOpen, Palette, Music, Minimize2 } from 'lucide-react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { useProContext } from '../../ProContext'
@@ -41,7 +41,6 @@ function getStreak(habit) {
             streak++
             d.setDate(d.getDate() - 1)
         } else {
-            // allow today to not be checked yet without breaking streak
             if (s === today && streak === 0) { d.setDate(d.getDate() - 1); continue }
             break
         }
@@ -49,7 +48,6 @@ function getStreak(habit) {
     return streak
 }
 
-// Get last 7 days as array of date strings
 function getLast7Days() {
     const days = []
     for (let i = 6; i >= 0; i--) {
@@ -70,6 +68,14 @@ function getDayLetter(dateStr) {
 export default function Habits() {
     const [habits, setHabits] = useLocalStorage('sd_habits', [])
     const [newName, setNewName] = useState('')
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
+
+    useEffect(() => {
+        const h = () => setIsMobile(window.innerWidth < 1024)
+        window.addEventListener('resize', h)
+        return () => window.removeEventListener('resize', h)
+    }, [])
+
     const { isPro } = useProContext()
     const { openWidget } = useWidgets()
     const [showUpgrade, setShowUpgrade] = useState(false)
@@ -148,7 +154,6 @@ export default function Habits() {
                 </div>
             )}
 
-            {/* Global Stats & Achievements */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', width: '100%', marginBottom: '2.5rem' }}>
                 <div className="panel-card" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.5rem' }}>
                     <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'var(--orange-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -188,7 +193,6 @@ export default function Habits() {
                 </div>
             </div>
 
-            {/* Add habit */}
             <div className="panel-card" style={{ marginBottom: '1.5rem' }}>
                 <p style={{ fontSize: '0.6875rem', fontWeight: 800, color: 'var(--text-4)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '1rem' }}>
                     Nuevo hábito
@@ -225,7 +229,6 @@ export default function Habits() {
                 </div>
             </div>
 
-            {/* Progress bar */}
             {habits.length > 0 && (
                 <div className="panel-card" style={{ padding: '1.25rem 1.5rem', marginBottom: '1.5rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.875rem' }}>
@@ -238,7 +241,6 @@ export default function Habits() {
                 </div>
             )}
 
-            {/* Habit tracker grid */}
             {habits.length === 0 ? (
                 <div className="panel-card" style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-4)' }}>
                     <div style={{ marginBottom: '1rem', opacity: 0.3, display: 'flex', justifyContent: 'center' }}>
@@ -247,44 +249,64 @@ export default function Habits() {
                     <p style={{ fontSize: '1rem', fontWeight: 500 }}>Agrega tu primer hábito para empezar el seguimiento</p>
                 </div>
             ) : (
-                <div className="panel-card" style={{ overflowX: 'auto' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) auto', gap: '0 1rem', marginBottom: '0.5rem' }}>
-                        <div />
-                        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${last7.length}, 36px)`, gap: '4px' }}>
-                            {last7.map(d => (
-                                <div key={d} style={{ textAlign: 'center', fontSize: '0.6875rem', fontWeight: 800, color: d === today ? 'var(--accent)' : 'var(--text-4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                                    {getDayLetter(d)}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {habits.map(habit => {
-                            const streak = getStreak(habit)
-                            const todayDone = (habit.completions || []).includes(today)
-                            return (
-                                <div key={habit.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) auto', gap: '0 1rem', alignItems: 'center' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-                                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                            <IconRenderer name={habit.icon} size={16} color={todayDone ? 'var(--accent)' : 'var(--text-4)'} />
-                                        </div>
-                                        <p style={{
-                                            fontWeight: 700, fontSize: '0.9375rem',
-                                            color: todayDone ? 'var(--text-1)' : 'var(--text-3)',
-                                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1
-                                        }}>
-                                            {habit.name}
-                                        </p>
-                                        {streak >= 2 && (
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.75rem', color: 'var(--orange)', fontWeight: 800, flexShrink: 0, marginRight: '8px' }}>
-                                                <Flame size={12} strokeWidth={3} /> {streak}
-                                            </span>
-                                        )}
-                                        <button className="icon-action-btn danger" onClick={() => deleteHabit(habit.id)}><Trash2 size={13} /></button>
+                <div className="habits-list">
+                    {!isMobile && (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 1fr) auto', gap: '0 1rem', marginBottom: '0.5rem' }}>
+                            <div />
+                            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${last7.length}, 36px)`, gap: '4px' }}>
+                                {last7.map(d => (
+                                    <div key={d} style={{ textAlign: 'center', fontSize: '0.6875rem', fontWeight: 800, color: d === today ? 'var(--accent)' : 'var(--text-4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                                        {getDayLetter(d)}
                                     </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${last7.length}, 36px)`, gap: '4px' }}>
+                    {habits.map(habit => {
+                        const streak = getStreak(habit)
+                        const todayDone = (habit.completions || []).includes(today)
+                        return (
+                            <div key={habit.id} style={{
+                                display: isMobile ? 'flex' : 'grid',
+                                flexDirection: isMobile ? 'column' : 'row',
+                                gridTemplateColumns: isMobile ? 'none' : 'minmax(240px, 1fr) auto',
+                                gap: isMobile ? '0.75rem' : '0 1rem',
+                                alignItems: isMobile ? 'flex-start' : 'center',
+                                padding: isMobile ? '1rem' : '0.5rem 0',
+                                borderBottom: isMobile ? '1px solid var(--border-subtle)' : 'none',
+                                marginBottom: isMobile ? '8px' : '0'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0, width: '100%' }}>
+                                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <IconRenderer name={habit.icon} size={16} color={todayDone ? 'var(--accent)' : 'var(--text-4)'} />
+                                    </div>
+                                    <p style={{
+                                        fontWeight: 700, fontSize: '0.9375rem',
+                                        color: todayDone ? 'var(--text-1)' : 'var(--text-3)',
+                                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1
+                                    }} title={habit.name}>
+                                        {habit.name}
+                                    </p>
+                                    {streak >= 2 && (
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.75rem', color: 'var(--orange)', fontWeight: 800, flexShrink: 0 }}>
+                                            <Flame size={12} strokeWidth={3} /> {streak}
+                                        </span>
+                                    )}
+                                    <button className="icon-action-btn-sm danger" onClick={() => deleteHabit(habit.id)}><Trash2 size={13} /></button>
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
+                                    {isMobile && (
+                                        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${last7.length}, 1fr)`, gap: '4px', marginBottom: '4px' }}>
+                                            {last7.map(d => (
+                                                <div key={d} style={{ textAlign: 'center', fontSize: '10px', fontWeight: 800, color: d === today ? 'var(--accent)' : 'var(--text-4)', textTransform: 'uppercase' }}>
+                                                    {getDayLetter(d)}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${last7.length}, ${isMobile ? '1fr' : '36px'})`, gap: '4px' }}>
                                         {last7.map(d => {
                                             const done = (habit.completions || []).includes(d)
                                             return (
@@ -292,7 +314,7 @@ export default function Habits() {
                                                     key={d}
                                                     onClick={() => toggleDay(habit.id, d)}
                                                     style={{
-                                                        width: '36px', height: '36px', borderRadius: '8px', border: '1px solid var(--border-subtle)',
+                                                        height: '36px', borderRadius: '8px', border: '1px solid var(--border-subtle)',
                                                         background: done ? 'var(--accent)' : 'var(--bg-input)',
                                                         color: done ? 'white' : 'transparent',
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -305,9 +327,9 @@ export default function Habits() {
                                         })}
                                     </div>
                                 </div>
-                            )
-                        })}
-                    </div>
+                            </div>
+                        )
+                    })}
                 </div>
             )}
         </div>

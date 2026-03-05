@@ -96,7 +96,7 @@ const SP_PLAYLISTS = [
    NOW PLAYING BAR
    Improved to show either YT player or Embed player (Spotify/SoundCloud)
 ───────────────────────────────────────────────────────────── */
-function NowPlaying({ current, playing, progress, duration, volume, loading, togglePlay, nextTrack, prevTrack, seek, setVolume, isLiked, toggleLike, adDetected, forceSkipAd }) {
+function NowPlaying({ current, playing, progress, duration, volume, loading, togglePlay, nextTrack, prevTrack, seek, setVolume, isLiked, toggleLike, adDetected, forceSkipAd, isMobile }) {
     if (!current) return (
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-4)' }}>
             <Music size={36} style={{ opacity: 0.2, marginBottom: '0.75rem' }} />
@@ -193,27 +193,29 @@ function NowPlaying({ current, playing, progress, duration, volume, loading, tog
 
             {/* Controls — only for YouTube (Spotify/SC have their own embed UI) */}
             {current.platform === 'youtube' ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-                    <button onClick={prevTrack} style={ctrlBtn}><SkipBack size={18} /></button>
-                    <button onClick={togglePlay} style={{ ...ctrlBtn, width: 52, height: 52, background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '50%', boxShadow: '0 4px 18px var(--accent-glow)' }}>
-                        {loading ? <RefreshCw size={20} className="spin" /> : playing ? <Pause size={22} /> : <Play size={22} style={{ marginLeft: 2 }} />}
-                    </button>
-                    <button onClick={nextTrack} style={ctrlBtn}><SkipForward size={18} /></button>
-                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.5rem' : '0.875rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.5rem' : '0.875rem' }}>
+                        <button onClick={prevTrack} style={{ ...ctrlBtn, width: isMobile ? 36 : 44, height: isMobile ? 36 : 44 }}><SkipBack size={18} /></button>
+                        <button onClick={togglePlay} style={{ ...ctrlBtn, width: isMobile ? 48 : 52, height: isMobile ? 48 : 52, background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '50%', boxShadow: '0 4px 18px var(--accent-glow)' }}>
+                            {loading ? <RefreshCw size={20} className="spin" /> : playing ? <Pause size={22} /> : <Play size={22} style={{ marginLeft: 2 }} />}
+                        </button>
+                        <button onClick={nextTrack} style={{ ...ctrlBtn, width: isMobile ? 36 : 44, height: isMobile ? 36 : 44 }}><SkipForward size={18} /></button>
+                    </div>
+                    <div style={{ marginLeft: isMobile ? '0' : 'auto', display: 'flex', alignItems: 'center', gap: 6, width: isMobile ? '100%' : 'auto', justifyContent: isMobile ? 'center' : 'flex-end', marginTop: isMobile ? '0.5rem' : '0' }}>
                         <button onClick={() => setVolume(volume > 0 ? 0 : 80)} style={{ ...ctrlBtn, width: 34, height: 34 }}>
                             {volume === 0 ? <VolumeX size={15} /> : <Volume2 size={15} />}
                         </button>
                         <input type="range" min={0} max={100} value={volume} onChange={e => setVolume(+e.target.value)}
-                            style={{ width: 80, accentColor: 'var(--accent)' }} />
+                            style={{ width: isMobile ? '100px' : 80, accentColor: 'var(--accent)' }} />
                     </div>
                 </div>
             ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-                    <button onClick={prevTrack} style={ctrlBtn}><SkipBack size={18} /></button>
-                    <span style={{ fontSize: '10px', color: 'var(--text-4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <button onClick={prevTrack} style={{ ...ctrlBtn, width: isMobile ? 36 : 44, height: isMobile ? 36 : 44 }}><SkipBack size={18} /></button>
+                    <span style={{ fontSize: '10px', color: 'var(--text-4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
                         Usa los controles del reproductor integrado
                     </span>
-                    <button onClick={nextTrack} style={{ ...ctrlBtn, marginLeft: 'auto' }}><SkipForward size={18} /></button>
+                    <button onClick={nextTrack} style={{ ...ctrlBtn, width: isMobile ? 36 : 44, height: isMobile ? 36 : 44, marginLeft: isMobile ? '0' : 'auto' }}><SkipForward size={18} /></button>
                 </div>
             )}
         </div>
@@ -285,7 +287,14 @@ function QueueItem({ track, index, isActive, onPlay, onRemove, isLiked, onLike, 
    MAIN PAGE
 ───────────────────────────────────────────────────────────── */
 export default function MusicQueue({ user }) {
-    const isMobile = window.innerWidth < 768
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
+
+    useEffect(() => {
+        const h = () => setIsMobile(window.innerWidth < 1024)
+        window.addEventListener('resize', h)
+        return () => window.removeEventListener('resize', h)
+    }, [])
+
     const { isPro, proInfo, trialExpired, startTrial } = useProContext()
     const [showUpgrade, setShowUpgrade] = useState(false)
     const { openWidget } = useWidgets()
@@ -424,6 +433,7 @@ export default function MusicQueue({ user }) {
                                 seek={seek} setVolume={setVolume}
                                 isLiked={isLiked} toggleLike={toggleLike}
                                 adDetected={adDetected} forceSkipAd={forceSkipAd}
+                                isMobile={isMobile}
                             />
                         </div>
                     )}
@@ -521,7 +531,7 @@ export default function MusicQueue({ user }) {
                             )}
 
                             {/* Preset grid */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '0.625rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) minmax(0, 1fr)', gap: '0.625rem' }}>
                                 {SP_PLAYLISTS.map(pl => {
                                     const isActive = spActive === pl.id
                                     return (
@@ -581,7 +591,7 @@ export default function MusicQueue({ user }) {
                                     <p style={{ fontSize: '0.8125rem', marginTop: 4 }}>Crea una playlist y añade canciones desde la cola</p>
                                 </div>
                             ) : (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '1rem' }}>
                                     {userPlaylists.map(pl => (
                                         <div key={pl.id} className="panel-card" style={{ padding: 0, overflow: 'hidden' }}>
                                             <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

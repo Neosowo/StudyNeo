@@ -107,7 +107,7 @@ export default function Dashboard({ user }) {
             </div>
 
             {/* ── Stats Grid ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div className="grid-responsive-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
                 {stats.map((s, i) => {
                     const Icon = s.icon
                     return (

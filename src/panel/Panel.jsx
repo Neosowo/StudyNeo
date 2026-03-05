@@ -43,7 +43,7 @@ const FULL_HEIGHT_PAGES = ['notes', 'calendar', 'flashcards']
 export default function Panel({ user, onExit, updateUser }) {
     const { isPro } = useProContext()
     const [activePage, setActivePage] = useState('dashboard')
-    const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024)
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
     const [isOffline, setIsOffline] = useState(!navigator.onLine)
 
@@ -53,11 +53,17 @@ export default function Panel({ user, onExit, updateUser }) {
         window.addEventListener('online', handleOnline)
         window.addEventListener('offline', handleOffline)
 
+        let lastWidth = window.innerWidth
         const handleResize = () => {
-            const mobile = window.innerWidth < 1024
-            setIsMobile(mobile)
-            if (mobile) setSidebarOpen(false)
-            else if (window.innerWidth > 1024) setSidebarOpen(true)
+            const width = window.innerWidth
+            const wasMobile = lastWidth < 1024
+            const isNowMobile = width < 1024
+
+            if (wasMobile !== isNowMobile) {
+                setIsMobile(isNowMobile)
+                setSidebarOpen(!isNowMobile)
+            }
+            lastWidth = width
         }
         window.addEventListener('resize', handleResize)
         return () => {
@@ -105,21 +111,21 @@ export default function Panel({ user, onExit, updateUser }) {
     return (
         <WidgetProvider>
             <AudioPlayerProvider>
-                <div className={`panel-root ${sidebarOpen ? 'sidebar-open' : ''} ${isMobile ? 'is-mobile' : ''}`}>
-                    {isMobile && !sidebarOpen && (
+                <div className={`panel-root ${isMobile ? 'is-mobile' : 'is-desktop'} ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+
+                    {/* Botón flotante para móvil */}
+                    {isMobile && (
                         <button
-                            className="mobile-toggle-btn"
+                            className={`mobile-toggle-btn ${sidebarOpen ? 'is-hidden' : 'is-visible'}`}
                             onClick={() => setSidebarOpen(true)}
-                            style={{
-                                position: 'fixed', top: '16px', left: '16px', zIndex: 1001,
-                                background: 'var(--accent)', color: 'white', border: 'none',
-                                padding: '10px', borderRadius: '12px', display: 'flex',
-                                boxShadow: '0 4px 15px var(--accent-dim)',
-                                backdropFilter: 'blur(10px)',
-                            }}
                         >
                             <Menu size={22} />
                         </button>
+                    )}
+
+                    {/* Overlay para móvil */}
+                    {isMobile && sidebarOpen && (
+                        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
                     )}
 
                     <Sidebar
@@ -131,10 +137,6 @@ export default function Panel({ user, onExit, updateUser }) {
                         user={user}
                         isMobile={isMobile}
                     />
-
-                    {isMobile && sidebarOpen && (
-                        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
-                    )}
 
                     <main
                         className="panel-main"
@@ -150,14 +152,12 @@ export default function Panel({ user, onExit, updateUser }) {
 
                     <style>{`
                 .panel-root { display: flex; min-height: 100vh; background: var(--bg-base); }
-                .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 999; animation: fadeIn 0.2s; }
-                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-                
-                @media (max-width: 768px) {
+                @media (max-width: 1024px) {
                     .panel-main { 
-                        padding-top: 72px;
+                        padding-top: 72px !important;
                         margin-left: 0 !important; 
                         width: 100% !important;
+                        overflow-x: hidden;
                     }
                 }
             `}</style>

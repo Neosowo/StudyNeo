@@ -397,16 +397,31 @@ export function AudioPlayerProvider({ children }) {
     useEffect(() => { currentIdxRef.current = idx }, [idx])
 
     /* ── Persist helpers ─────────────────────────────────────── */
+    const syncLS = (key, value) => {
+        const stringified = typeof value === 'string' ? value : JSON.stringify(value)
+        localStorage.setItem(key, stringified)
+        if (key.startsWith('sd_')) {
+            try {
+                const meta = JSON.parse(localStorage.getItem('sd_meta') || '{}')
+                meta[key] = new Date().toISOString()
+                localStorage.setItem('sd_meta', JSON.stringify(meta))
+            } catch (e) { }
+        }
+        window.dispatchEvent(new Event('storage'))
+    }
+
     const setQueue = useCallback(fn => setQueueSt(prev => {
         const next = typeof fn === 'function' ? fn(prev) : fn
-        localStorage.setItem(QUEUE_KEY, JSON.stringify(next)); return next
+        syncLS(QUEUE_KEY, next); return next
     }), [])
+
     const setIdx = useCallback(fn => setIdxSt(prev => {
         const next = typeof fn === 'function' ? fn(prev) : fn
-        localStorage.setItem(IDX_KEY, String(next)); return next
+        syncLS(IDX_KEY, next); return next
     }), [])
-    const saveLikes = useCallback(next => { localStorage.setItem(LIKES_KEY, JSON.stringify(next)); return next }, [])
-    const saveUserPlaylists = useCallback(next => { localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(next)); return next }, [])
+
+    const saveLikes = useCallback(next => { syncLS(LIKES_KEY, next); return next }, [])
+    const saveUserPlaylists = useCallback(next => { syncLS(PLAYLISTS_KEY, next); return next }, [])
 
     const current = queue[idx] ?? null
 
@@ -422,6 +437,20 @@ export function AudioPlayerProvider({ children }) {
             if (p) { pendingRef.current = null; _initPlayer(p) }
         }
     }, []) // eslint-disable-line
+
+    /* ── Listen to Sync Updates ────────────────────────────── */
+    useEffect(() => {
+        const handleSync = () => {
+            const newQ = readLS(QUEUE_KEY, [])
+            const newI = readLS(IDX_KEY, 0)
+            setQueueSt(newQ)
+            setIdxSt(Math.min(newI, Math.max(0, newQ.length - 1)))
+            setLikesSt(readLS(LIKES_KEY, []))
+            setUserPlaylistsSt(readLS(PLAYLISTS_KEY, []))
+        }
+        window.addEventListener('sd_sync_update', handleSync)
+        return () => window.removeEventListener('sd_sync_update', handleSync)
+    }, [])
 
     /* ── Init / recreate the YT player ──────────────────────── */
     // payload: { type: 'video', videoId } | { type: 'playlist', playlistId }
@@ -575,7 +604,6 @@ export function AudioPlayerProvider({ children }) {
     const _preloadNext = useCallback(track => {
         if (!track.videoId || preloadHandled.current === track.id) return
         preloadHandled.current = track.id
-        console.log('🕒 Shadow Preload starting for:', track.title)
 
         if (shadowRef.current) {
             try { shadowRef.current.destroy() } catch (e) { }
@@ -596,7 +624,6 @@ export function AudioPlayerProvider({ children }) {
                     // Let the ad play in shadow if any
                     const S = window.YT.PlayerState
                     if (e.data === S.PLAYING) {
-                        console.log('✅ Shadow ready (ad passed or no ad)')
                     }
                 }
             }
@@ -679,7 +706,6 @@ export function AudioPlayerProvider({ children }) {
 
         // If we have a shadow player ready for this track, SWAP THEM
         if (shadowRef.current && preloadHandled.current === track.id) {
-            console.log('⚡ Swapping Shadow to Active')
             if (ytRef.current) {
                 try { ytRef.current.destroy() } catch (e) { }
             }
@@ -745,7 +771,7 @@ export function AudioPlayerProvider({ children }) {
     }, [])
     const setVolume = useCallback(v => {
         setVolumeSt(v)
-        localStorage.setItem('sd_audio_volume', String(v))
+        syncLS('sd_audio_volume', String(v))
         if (ytRef.current && typeof ytRef.current.setVolume === 'function') {
             ytRef.current.setVolume(v)
         }

@@ -207,6 +207,13 @@ export default function MusicPlayer() {
     const [connecting, setConnecting] = useState(false)
     const [connectError, setConnectError] = useState(null)
     const [showQueue, setShowQueue] = useState(false)
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
+
+    useEffect(() => {
+        const h = () => setIsMobile(window.innerWidth < 1024)
+        window.addEventListener('resize', h)
+        return () => window.removeEventListener('resize', h)
+    }, [])
 
     const {
         queue, current, idx, playing, volume, progress, duration,
@@ -336,26 +343,26 @@ export default function MusicPlayer() {
                         {current ? `▶ ${current.title?.slice(0, 35) || 'Reproduciendo…'}` : 'Escucha música mientras estudias'}
                     </p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', width: isMobile ? '100%' : 'auto' }}>
                     <button onClick={() => setShowQueue(q => !q)} title="Ver cola"
                         style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10, border: '1px solid var(--border-subtle)', background: showQueue ? 'var(--accent-dim)' : 'var(--bg-elevated)', color: showQueue ? 'var(--accent)' : 'var(--text-3)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700 }}>
                         <List size={13} /> Cola {queue.length > 0 && `(${queue.length})`}
                     </button>
                     {/* Spotify connect badge */}
                     {spotifyToken ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            {spotifyProfile?.images?.[0] && <img src={spotifyProfile.images[0].url} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />}
-                            <div style={{ lineHeight: 1.2 }}>
-                                <p style={{ fontWeight: 800, fontSize: '13px', color: '#1db954' }}>✓ Spotify conectado</p>
-                                <p style={{ fontSize: '11px', color: 'var(--text-4)', fontWeight: 600 }}>{spotifyProfile?.display_name}</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-base)', padding: '4px 12px 4px 4px', borderRadius: '20px', border: '1px solid var(--border-subtle)', maxWidth: '100%', overflow: 'hidden' }}>
+                            {spotifyProfile?.images?.[0] ? <img src={spotifyProfile.images[0].url} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} /> : <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#1db954', flexShrink: 0 }}></div>}
+                            <div style={{ lineHeight: 1.2, flex: 1, minWidth: 0 }}>
+                                <p style={{ fontWeight: 800, fontSize: '12px', color: '#1db954', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>✓ Spotify conectado</p>
+                                <p style={{ fontSize: '10px', color: 'var(--text-4)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{spotifyProfile?.display_name}</p>
                             </div>
-                            <button onClick={handleDisconnect} title="Desconectar" style={{ background: 'none', border: 'none', color: 'var(--text-4)', cursor: 'pointer', display: 'flex', padding: '4px' }}>
+                            <button onClick={handleDisconnect} title="Desconectar" style={{ background: 'none', border: 'none', color: 'var(--text-4)', cursor: 'pointer', display: 'flex', padding: '4px', flexShrink: 0 }}>
                                 <LogOut size={15} />
                             </button>
                         </div>
                     ) : (
                         <button onClick={handleConnect} disabled={connecting}
-                            style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '10px 20px', borderRadius: '12px', border: 'none', background: connecting ? 'var(--bg-hover)' : '#1db954', color: connecting ? 'var(--text-3)' : 'white', fontWeight: 900, fontSize: '14px', cursor: connecting ? 'not-allowed' : 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+                            style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '10px 16px', borderRadius: '12px', border: 'none', background: connecting ? 'var(--bg-hover)' : '#1db954', color: connecting ? 'var(--text-3)' : 'white', fontWeight: 900, fontSize: '13px', cursor: connecting ? 'not-allowed' : 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', width: isMobile ? '100%' : 'auto', justifyContent: 'center' }}>
                             <Music size={16} /> {connecting ? 'Conectando…' : 'Conectar Spotify'}
                         </button>
                     )}
@@ -370,7 +377,12 @@ export default function MusicPlayer() {
                 </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: showQueue ? '1fr 340px' : '1fr', gap: '1.25rem', alignItems: 'start' }}>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: (showQueue && !isMobile) ? '1fr 340px' : '1fr',
+                gap: '1.25rem',
+                alignItems: 'start'
+            }}>
                 <div>
                     {/* Now Playing */}
                     {current && (
@@ -410,7 +422,7 @@ export default function MusicPlayer() {
 
                     {/* ── Presets ── */}
                     {tab === 'presets' && (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '0.875rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: '0.875rem' }}>
                             {PRESETS.map(p => {
                                 const loading = loadingPreset === p.label
                                 return (
@@ -421,9 +433,9 @@ export default function MusicPlayer() {
                                         <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>
                                             {loading ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : p.emoji}
                                         </div>
-                                        <div>
-                                            <p style={{ fontWeight: 800, fontSize: '0.875rem', color: 'var(--text-1)', marginBottom: '2px' }}>{p.label}</p>
-                                            <p style={{ fontSize: '11px', color: 'var(--text-4)', fontWeight: 600 }}>{p.desc}</p>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <p style={{ fontWeight: 800, fontSize: '0.875rem', color: 'var(--text-1)', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.label}</p>
+                                            <p style={{ fontSize: '11px', color: 'var(--text-4)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.desc}</p>
                                             <p style={{ fontSize: '10px', color: '#1db954', fontWeight: 700, marginTop: '2px' }}>🎵 → ▶️ bot-style</p>
                                         </div>
                                     </div>
@@ -487,15 +499,15 @@ export default function MusicPlayer() {
                                 &nbsp;&nbsp;&nbsp;&nbsp;<strong>YouTube:</strong> Video o playlist directo. <strong>SoundCloud:</strong> Embed nativo.
                             </div>
                             <form onSubmit={e => { e.preventDefault(); loadUrl(inputUrl.trim()) }} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                                <div style={{ flex: 1, position: 'relative', minWidth: '240px' }}>
+                                <div style={{ flex: 1, position: 'relative', minWidth: isMobile ? '100%' : '240px' }}>
                                     <Link size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-4)', pointerEvents: 'none' }} />
                                     <input className="panel-input" style={{ paddingLeft: '38px', width: '100%' }}
                                         value={inputUrl} onChange={e => setInputUrl(e.target.value)}
-                                        placeholder="https://open.spotify.com/playlist/…  |  youtube.com/…  |  soundcloud.com/…"
+                                        placeholder={isMobile ? "Pega el link aquí..." : "https://open.spotify.com/playlist/…  |  youtube.com/…  |  soundcloud.com/…"}
                                         disabled={loadingUrl} />
                                 </div>
-                                <button type="submit" className="btn-primary-sm" style={{ padding: '0 22px', opacity: loadingUrl ? 0.6 : 1, cursor: loadingUrl ? 'wait' : 'pointer' }} disabled={loadingUrl}>
-                                    {loadingUrl ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <><Play size={15} /> Añadir</>}
+                                <button type="submit" className="btn-primary-sm" style={{ padding: '0 22px', opacity: loadingUrl ? 0.6 : 1, cursor: loadingUrl ? 'wait' : 'pointer', width: isMobile ? '100%' : 'auto', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px' }} disabled={loadingUrl}>
+                                    {loadingUrl ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <><Play size={15} style={{ marginRight: '6px' }} /> Añadir</>}
                                 </button>
                             </form>
 
@@ -524,7 +536,18 @@ export default function MusicPlayer() {
 
                 {/* ── Sidebar Queue ── */}
                 {showQueue && (
-                    <div className="panel-card" style={{ position: 'sticky', top: '1rem', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+                    <div className="panel-card" style={{
+                        position: isMobile ? 'fixed' : 'sticky',
+                        top: isMobile ? '0' : '1rem',
+                        left: isMobile ? '0' : 'auto',
+                        right: isMobile ? '0' : 'auto',
+                        bottom: isMobile ? '0' : 'auto',
+                        zIndex: isMobile ? 2000 : 100,
+                        height: isMobile ? '100vh' : 'auto',
+                        maxHeight: isMobile ? 'none' : '80vh',
+                        display: 'flex', flexDirection: 'column',
+                        borderRadius: isMobile ? 0 : '18px'
+                    }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexShrink: 0 }}>
                             <p style={{ fontWeight: 900, fontSize: '0.9375rem' }}>Cola ({queue.length})</p>
                             <div style={{ display: 'flex', gap: '8px' }}>

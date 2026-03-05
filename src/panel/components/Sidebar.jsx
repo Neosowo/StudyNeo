@@ -4,7 +4,7 @@ import {
     Cloud, CloudOff, User, StickyNote, Music, Zap,
     ChevronRight, Repeat, Brain, Timer, CalendarDays,
     Flame, TrendingUp, Link2, Calculator, Briefcase, BookOpen, Users,
-    LayoutGrid, SkipBack, SkipForward, Play, Pause
+    LayoutGrid, SkipBack, SkipForward, Play, Pause, X
 } from 'lucide-react'
 import { useProContext } from '../../ProContext'
 import { useSync } from '../hooks/useSync'
@@ -67,11 +67,9 @@ export default function Sidebar({ active, onNavigate, onExit, open, onToggle, us
                 ) : (
                     <div style={{ display: 'flex', width: '100%', padding: '0 20px', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div className="logo-text" style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-1)', letterSpacing: '-0.02em' }}>StudyNeo<span style={{ color: 'var(--accent)' }}>.</span></div>
-                        {!isMobile && (
-                            <button onClick={onToggle} style={{ background: 'var(--bg-hover)', border: 'none', borderRadius: '8px', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', cursor: 'pointer' }}>
-                                <ChevronRight size={14} style={{ transform: 'rotate(180deg)' }} />
-                            </button>
-                        )}
+                        <button onClick={onToggle} style={{ background: 'var(--bg-hover)', border: 'none', borderRadius: '8px', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', cursor: 'pointer' }}>
+                            {isMobile ? <X size={14} /> : <ChevronRight size={14} style={{ transform: 'rotate(180deg)' }} />}
+                        </button>
                     </div>
                 )}
             </div>
@@ -120,7 +118,19 @@ export default function Sidebar({ active, onNavigate, onExit, open, onToggle, us
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                         {isPro && <ZapIcon size={10} color="var(--accent)" fill="var(--accent)" />}
                                         <div title={`Sincronización: ${formatNextSync()}`}>
-                                            {isOffline || isQuotaExceeded ? <CloudOff size={10} color="var(--red)" /> : (isSyncing ? <Cloud size={10} color="var(--accent)" className="sync-pulse" /> : <Cloud size={10} color="#10b981" />)}
+                                            {isOffline || isQuotaExceeded ? (
+                                                <CloudOff size={10} color="var(--red)" />
+                                            ) : (
+                                                isSyncing ? (
+                                                    <Cloud size={10} color="var(--accent)" className="sync-pulse" />
+                                                ) : (
+                                                    isDirty ? (
+                                                        <Cloud size={10} color="var(--yellow)" />
+                                                    ) : (
+                                                        <Cloud size={10} color="var(--accent)" />
+                                                    )
+                                                )
+                                            )}
                                         </div>
                                     </div>
                                 </div>

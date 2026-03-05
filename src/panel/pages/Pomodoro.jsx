@@ -195,7 +195,7 @@ export default function Pomodoro() {
             </div>
 
             {/* Mode selector */}
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2.5rem', background: 'var(--bg-hover)', borderRadius: '12px', padding: '4px', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2.5rem', background: 'var(--bg-hover)', borderRadius: '12px', padding: '4px', border: '1px solid var(--border-subtle)', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {Object.entries(MODES).map(([key, m]) => (
                     <button
                         key={key}
@@ -262,7 +262,7 @@ export default function Pomodoro() {
             </div>
 
             {/* Info */}
-            <div style={{ marginTop: '2.5rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', width: '100%', maxWidth: '480px' }}>
+            <div className="pomo-info-grid" style={{ marginTop: '2.5rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', width: '100%', maxWidth: '480px' }}>
                 {[
                     { label: 'Foco', value: `${MODES.focus.minutes} min`, color: 'var(--accent)' },
                     { label: 'Descanso', value: `${MODES.short.minutes} min`, color: 'var(--green)' },
@@ -281,7 +281,7 @@ export default function Pomodoro() {
                     <div style={{ padding: '4px 8px', borderRadius: '6px', background: 'var(--accent)', color: 'white', fontSize: '10px', fontWeight: 900 }}>PRO</div>
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ambiente de enfoque</span>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     {AMBIENT_SOUNDS.map(s => (
                         <button
                             key={s.id}
