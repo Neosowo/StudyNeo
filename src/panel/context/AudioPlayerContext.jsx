@@ -35,45 +35,6 @@ export function detectMusicPlatform(url) {
     return null
 }
 
-/* ── Option 2 Resolver: Direct Audio Stream (Piped Instances) ── */
-async function fetchAudioStream(videoId) {
-    const instances = [
-        'pipedapi.kavin.rocks',
-        'piped-api.lunar.icu',
-        'pipedapi.colloquial.net',
-        'piped-api.garudalinux.org'
-    ];
-
-    // Shuffle and try each instance
-    const shuffled = [...instances].sort(() => Math.random() - 0.5);
-
-    for (const host of shuffled) {
-        try {
-            const url = `https://${host}/streams/${videoId}`;
-            // Directly fetch if possible, or via CORS proxy if needed
-            let res = await fetch(url).catch(() => null);
-
-            // Fallback to proxy if direct fetch fails (CORS)
-            if (!res || !res.ok) {
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-                const proxyRes = await fetch(proxyUrl);
-                if (!proxyRes.ok) continue;
-                const data = await proxyRes.json();
-                const json = JSON.parse(data.contents);
-                const stream = json.audioStreams?.find(s => s.bitrate >= 128000) || json.audioStreams?.[0];
-                if (stream?.url) return stream.url;
-            } else {
-                const json = await res.json();
-                const stream = json.audioStreams?.find(s => s.bitrate >= 128000) || json.audioStreams?.[0];
-                if (stream?.url) return stream.url;
-            }
-        } catch (e) {
-            console.warn(`Piped host ${host} failed:`, e.message);
-        }
-    }
-    return null;
-}
-
 /* ── Proxy Helpers (Cleaned & High Reliability) ───────────────── */
 const PROXIES = [
     url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
@@ -422,11 +383,9 @@ export function AudioPlayerProvider({ children }) {
     const [likes, setLikesSt] = useState(() => readLS(LIKES_KEY, []))
     // Custom Playlists
     const [userPlaylists, setUserPlaylistsSt] = useState(() => readLS(PLAYLISTS_KEY, []))
-    const [isNative, setIsNative] = useState(false) // Whether we are using the direct stream (no ads)
 
     const ytRef = useRef(null)         // Active YT.Player instance
-    const shadowRef = useRef(null)     // Preload YT.Player (IFrame fallback)
-    const audioRef = useRef(null)      // Native HTML5 Audio
+    const shadowRef = useRef(null)     // Preload YT.Player instance
     const ytReady = useRef(false)
     const progTimer = useRef(null)
     const infoTimer = useRef(null)
@@ -710,34 +669,6 @@ export function AudioPlayerProvider({ children }) {
             track = await _resolveFullTrack(track)
         }
 
-        const videoId = track.videoId || (track.platform === 'youtube' ? extractYTVideoId(track.url) : null)
-
-        // --- Try Option 2: Direct Audio Stream (No Ads) ---
-        if (videoId) {
-            const streamUrl = await fetchAudioStream(videoId)
-            if (streamUrl) {
-                console.log('💎 Option 2: Direct Stream active (Zero Ads)')
-                setIsNative(true)
-                if (ytRef.current) { try { ytRef.current.stopVideo() } catch (e) { } }
-
-                const audio = audioRef.current
-                if (audio) {
-                    audio.src = streamUrl
-                    audio.volume = volume / 100
-                    audio.load()
-                    audio.play().catch(e => console.error('Play error:', e))
-                    setLoading(false); setPlaying(true)
-                    _startTimers()
-                }
-                return
-            }
-        }
-
-        // --- Fallback to IFrame (Previous system with bypasses) ---
-        console.warn('⚠️ Option 2 failed. Falling back to IFrame Player.')
-        setIsNative(false)
-        if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = "" }
-
         // AUTO-PRELOAD: Resolve the NEXT track in background
         const nextIdx = newIdx + 1 < q.length ? newIdx + 1 : 0
         const nextTrack = q[nextIdx]
@@ -781,84 +712,44 @@ export function AudioPlayerProvider({ children }) {
     }, [setIdx, _initPlayer, _resolveFullTrack])
 
     /* ── Controls ────────────────────────────────────────────── */
-    const play = useCallback(() => {
-        if (isNative) {
-            audioRef.current?.play()
-        } else {
-            ytRef.current?.playVideo()
-        }
-        setPlaying(true)
-    }, [isNative])
-
-    const pause = useCallback(() => {
-        if (isNative) {
-            audioRef.current?.pause()
-        } else {
-            ytRef.current?.pauseVideo()
-        }
-        setPlaying(false)
-    }, [isNative])
-
+    const play = useCallback(() => { ytRef.current?.playVideo(); setPlaying(true) }, [])
+    const pause = useCallback(() => { ytRef.current?.pauseVideo(); setPlaying(false) }, [])
     const togglePlay = useCallback(() => {
         if (!current) return
-        if (isNative) {
-            playing ? audioRef.current?.pause() : audioRef.current?.play()
-            setPlaying(!playing)
-            return
-        }
         if (!ytRef.current) { _playAt(idx); return }
         playing ? pause() : play()
-    }, [current, playing, idx, _playAt, play, pause, isNative])
+    }, [current, playing, idx, _playAt, play, pause])
 
     const nextTrack = useCallback(() => {
         const q = readLS(QUEUE_KEY, [])
         const cur = currentIdxRef.current
-        if (!isNative && q[cur]?.type === 'playlist' && ytRef.current?.nextVideo) {
-            ytRef.current.nextVideo(); return
-        }
+        // If current item is a YT playlist, use native YT next
+        if (q[cur]?.type === 'playlist' && ytRef.current?.nextVideo) { ytRef.current.nextVideo(); return }
         const next = cur + 1 < q.length ? cur + 1 : 0
         setIdx(next); setTimeout(() => _playAt(next), 50)
-    }, [setIdx, _playAt, isNative])
+    }, [setIdx, _playAt])
 
     const prevTrack = useCallback(() => {
         const q = readLS(QUEUE_KEY, [])
         const cur = currentIdxRef.current
-        if (!isNative && q[cur]?.type === 'playlist' && ytRef.current?.previousVideo) {
-            ytRef.current.previousVideo(); return
-        }
-
-        // Time logic for "restart track" vs "previous track"
-        const time = isNative ? audioRef.current?.currentTime : ytRef.current?.getCurrentTime()
-        if (time > 3) {
-            if (isNative) audioRef.current.currentTime = 0
-            else ytRef.current.seekTo(0, true)
-            return
-        }
-
+        if (q[cur]?.type === 'playlist' && ytRef.current?.previousVideo) { ytRef.current.previousVideo(); return }
+        const p = ytRef.current
+        if (p?.getCurrentTime() > 3) { p.seekTo(0, true); return }
         const prev = cur > 0 ? cur - 1 : q.length - 1
         setIdx(prev); setTimeout(() => _playAt(prev), 50)
-    }, [setIdx, _playAt, isNative])
+    }, [setIdx, _playAt])
 
     const seek = useCallback(pct => {
-        if (isNative && audioRef.current) {
-            audioRef.current.currentTime = (pct / 100) * audioRef.current.duration
-            setProgress(pct)
-            return
-        }
         const p = ytRef.current; if (!p) return
         p.seekTo((pct / 100) * p.getDuration(), true); setProgress(pct)
-    }, [isNative])
-
+    }, [])
     const setVolume = useCallback(v => {
         setVolumeSt(v)
         localStorage.setItem('sd_audio_volume', String(v))
-        if (isNative && audioRef.current) {
-            audioRef.current.volume = v / 100
-        }
         if (ytRef.current && typeof ytRef.current.setVolume === 'function') {
             ytRef.current.setVolume(v)
         }
-    }, [isNative])
+    }, [])
 
     /* ── Queue management ────────────────────────────────────── */
     const addTrack = useCallback(async rawUrl => {
@@ -1091,21 +982,6 @@ export function AudioPlayerProvider({ children }) {
             <div style={{ position: 'fixed', width: 1, height: 1, opacity: 0, pointerEvents: 'none', zIndex: -1 }}>
                 <div id="yt-hidden-player" />
                 <div id="yt-shadow-player" />
-                <audio
-                    ref={audioRef}
-                    id="native-audio-player"
-                    onTimeUpdate={() => {
-                        if (!isNative) return
-                        const a = audioRef.current
-                        if (a) {
-                            setProgress((a.currentTime / a.duration) * 100)
-                            setDuration(a.duration)
-                        }
-                    }}
-                    onEnded={() => {
-                        if (isNative) _advanceQueue()
-                    }}
-                />
             </div>
             {children}
         </AudioCtx.Provider>
