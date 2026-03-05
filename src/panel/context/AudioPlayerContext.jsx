@@ -377,8 +377,8 @@ export function AudioPlayerProvider({ children }) {
     const [progress, setProgress] = useState(0)
     const [duration, setDuration] = useState(0)
     const [loading, setLoading] = useState(false)
-    // Current video info when playing a YT playlist (updated via getVideoData)
     const [liveTrackInfo, setLiveTrackInfo] = useState(null)
+    const [adDetected, setAdDetected] = useState(false)  // True while an ad is playing
     // Likes
     const [likes, setLikesSt] = useState(() => readLS(LIKES_KEY, []))
     // Custom Playlists
@@ -390,6 +390,8 @@ export function AudioPlayerProvider({ children }) {
     const infoTimer = useRef(null)
     const pendingRef = useRef(null)  // { type, id } queued before API loads
     const currentIdxRef = useRef(idx)
+    const intendedVideoId = useRef(null)  // The video we SHOULD be playing (for ad detection)
+    const adMuted = useRef(false)          // Track if we muted because of an ad
     useEffect(() => { currentIdxRef.current = idx }, [idx])
 
     /* ── Persist helpers ─────────────────────────────────────── */
@@ -434,6 +436,10 @@ export function AudioPlayerProvider({ children }) {
         const isPlaylist = payload.type === 'playlist'
         const playerVars = { autoplay: 1, controls: 0, playsinline: 1, fs: 0, iv_load_policy: 3, modestbranding: 1, ...(isPlaylist ? { listType: 'playlist', list: payload.playlistId } : {}) }
 
+        // Save the intended video ID for ad detection
+        intendedVideoId.current = isPlaylist ? null : payload.videoId
+        adMuted.current = false
+
         ytRef.current = new window.YT.Player('yt-hidden-player', {
             height: '1', width: '1',
             host: 'https://www.youtube-nocookie.com', // Privacy Enhanced Mode — reduces/eliminates ads
@@ -450,12 +456,38 @@ export function AudioPlayerProvider({ children }) {
                 },
                 onStateChange: e => {
                     const S = window.YT.PlayerState
+                    if (e.data === S.PLAYING || e.data === S.BUFFERING) {
+                        // Instant ad detection on every state change
+                        const data = ytRef.current?.getVideoData?.()
+                        const expected = intendedVideoId.current
+                        if (expected && data?.video_id && data.video_id !== expected) {
+                            // 🚫 AD DETECTED — mute instantly
+                            try { ytRef.current.mute() } catch { }
+                            adMuted.current = true
+                            setAdDetected(true)
+                            // Force cancel ad by reloading the real video
+                            setTimeout(() => {
+                                try {
+                                    if (ytRef.current?.loadVideoById) {
+                                        ytRef.current.loadVideoById(expected)
+                                        ytRef.current.playVideo()
+                                    }
+                                } catch { }
+                            }, 200)
+                            return
+                        }
+                        // Real video playing
+                        if (adMuted.current) {
+                            try { ytRef.current.unMute(); ytRef.current.setVolume(volume) } catch { }
+                            adMuted.current = false
+                            setAdDetected(false)
+                        }
+                    }
                     if (e.data === S.PLAYING) { setPlaying(true); setLoading(false); _startTimers() }
                     if (e.data === S.PAUSED) { setPlaying(false); _stopTimers() }
                     if (e.data === S.BUFFERING) { setLoading(true) }
                     if (e.data === S.ENDED) {
                         if (!isPlaylist) { _stopTimers(); _advanceQueue() }
-                        // For playlists, YT handles it natively
                     }
                 },
                 onError: () => { setLoading(false); _advanceQueue() }
@@ -474,25 +506,55 @@ export function AudioPlayerProvider({ children }) {
     const _startTimers = useCallback(() => {
         clearInterval(progTimer.current)
         clearInterval(infoTimer.current)
+
         progTimer.current = setInterval(() => {
             const p = ytRef.current; if (!p?.getCurrentTime) return
             const t = p.getCurrentTime(), d = p.getDuration() || 1
             setDuration(d); setProgress((t / d) * 100)
         }, 1000)
-        // Poll video data (title/thumb) for playlists
+
+        // Ad detection + auto-skip/mute
         infoTimer.current = setInterval(() => {
             const p = ytRef.current; if (!p?.getVideoData) return
             const data = p.getVideoData()
-            if (data?.video_id) {
+            if (!data?.video_id) return
+
+            const expected = intendedVideoId.current
+            const actual = data.video_id
+            const isAd = expected && actual && actual !== expected
+
+            if (isAd) {
+                // --- AD DETECTED ---
+                if (!adMuted.current) {
+                    // 1. Mute immediately so user doesn't hear it
+                    try { p.mute() } catch { }
+                    adMuted.current = true
+                }
+                // 2. Try to seek to the end to force skip
+                try {
+                    const dur = p.getDuration()
+                    if (dur > 0) p.seekTo(dur, true)
+                } catch { }
+            } else {
+                // --- REAL VIDEO ---
+                if (adMuted.current) {
+                    // Restore volume after ad
+                    try { p.unMute(); p.setVolume(volume) } catch { }
+                    adMuted.current = false
+                }
+                // Update live track info for playlists
+                if (!expected) {
+                    intendedVideoId.current = actual // lock in for playlists
+                }
                 setLiveTrackInfo({
-                    videoId: data.video_id,
+                    videoId: actual,
                     title: data.title,
                     author: data.author || '',
-                    thumbnail: `https://img.youtube.com/vi/${data.video_id}/mqdefault.jpg`,
+                    thumbnail: `https://img.youtube.com/vi/${actual}/mqdefault.jpg`,
                 })
             }
-        }, 2000)
-    }, [])
+        }, 500) // Check every 500ms for fast ad detection
+    }, [volume])
     const _stopTimers = useCallback(() => { clearInterval(progTimer.current); clearInterval(infoTimer.current) }, [])
 
     /* ── Advance to next queue item ──────────────────────────── */
@@ -824,6 +886,17 @@ export function AudioPlayerProvider({ children }) {
         setTimeout(() => _playAt(0), 150)
     }, [userPlaylists, setQueue, setIdx, _playAt])
 
+    const forceSkipAd = useCallback(() => {
+        const expected = intendedVideoId.current
+        if (expected && ytRef.current?.loadVideoById) {
+            try {
+                ytRef.current.loadVideoById(expected)
+                ytRef.current.playVideo()
+                setAdDetected(false)
+            } catch (e) { }
+        }
+    }, [])
+
     /* ── Computed "displayCurrent" — merges queue info + live playlist info ── */
     const displayCurrent = current
         ? (current.type === 'playlist' && liveTrackInfo
@@ -834,8 +907,8 @@ export function AudioPlayerProvider({ children }) {
     return (
         <AudioCtx.Provider value={{
             queue, current: displayCurrent, rawCurrent: current, idx, playing,
-            volume, progress, duration, loading, liveTrackInfo,
-            play, pause, togglePlay, nextTrack, prevTrack, seek, setVolume,
+            volume, progress, duration, loading, liveTrackInfo, adDetected,
+            play, pause, togglePlay, nextTrack, prevTrack, seek, setVolume, forceSkipAd,
             addTrack, removeTrack, clearQueue, playTrackNow,
             likes, isLiked, toggleLike, removeLike,
             userPlaylists, createPlaylist, deletePlaylist, addToPlaylist, removeFromPlaylist, playPlaylist,

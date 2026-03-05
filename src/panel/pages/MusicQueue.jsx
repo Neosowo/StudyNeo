@@ -96,7 +96,7 @@ const SP_PLAYLISTS = [
    NOW PLAYING BAR
    Improved to show either YT player or Embed player (Spotify/SoundCloud)
 ───────────────────────────────────────────────────────────── */
-function NowPlaying({ current, playing, progress, duration, volume, loading, togglePlay, nextTrack, prevTrack, seek, setVolume, isLiked, toggleLike }) {
+function NowPlaying({ current, playing, progress, duration, volume, loading, togglePlay, nextTrack, prevTrack, seek, setVolume, isLiked, toggleLike, adDetected, forceSkipAd }) {
     if (!current) return (
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-4)' }}>
             <Music size={36} style={{ opacity: 0.2, marginBottom: '0.75rem' }} />
@@ -138,6 +138,23 @@ function NowPlaying({ current, playing, progress, duration, volume, loading, tog
                     <Heart size={20} fill={liked ? '#e63946' : 'none'} />
                 </button>
             </div>
+
+            {/* Ad Detection UI Overlay */}
+            {adDetected && (
+                <div style={{ marginBottom: '1.25rem', padding: '1rem', background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 14, display: 'flex', alignItems: 'center', gap: 14, animation: 'pulse 2s infinite' }}>
+                    <Zap size={20} color="var(--accent)" className="spin" />
+                    <div style={{ flex: 1 }}>
+                        <p style={{ fontWeight: 900, fontSize: '0.875rem', color: 'var(--text-1)' }}>Anuncio detectado</p>
+                        <p style={{ fontSize: '11px', color: 'var(--text-3)', fontWeight: 600 }}>Tu música empezará en un momento...</p>
+                    </div>
+                    <button
+                        onClick={() => forceSkipAd()}
+                        style={{ padding: '8px 16px', borderRadius: 10, background: 'var(--accent)', color: 'white', border: 'none', fontWeight: 800, fontSize: 13, cursor: 'pointer' }}
+                    >
+                        Omitir
+                    </button>
+                </div>
+            )}
 
             {/* Searching YT audio state (Visual only, no text) */}
             {!showYT && (current.platform === 'spotify' || current.platform === 'soundcloud') && (
@@ -272,8 +289,8 @@ export default function MusicQueue({ user }) {
     const [showUpgrade, setShowUpgrade] = useState(false)
     const { openWidget } = useWidgets()
     const {
-        queue, current, idx, playing, volume, progress, duration, loading,
-        togglePlay, nextTrack, prevTrack, seek, setVolume,
+        queue, current, idx, playing, volume, progress, duration, loading, adDetected,
+        togglePlay, nextTrack, prevTrack, seek, setVolume, forceSkipAd,
         addTrack, removeTrack, clearQueue, playTrackNow,
         likes, isLiked, toggleLike, removeLike,
         userPlaylists, createPlaylist, deletePlaylist, addToPlaylist, removeFromPlaylist, playPlaylist
@@ -398,6 +415,7 @@ export default function MusicQueue({ user }) {
                                 togglePlay={togglePlay} nextTrack={nextTrack} prevTrack={prevTrack}
                                 seek={seek} setVolume={setVolume}
                                 isLiked={isLiked} toggleLike={toggleLike}
+                                adDetected={adDetected} forceSkipAd={forceSkipAd}
                             />
                         </div>
                     )}
