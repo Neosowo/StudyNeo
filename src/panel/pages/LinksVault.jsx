@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Trash2, ExternalLink, Search, Link2, Tag, Copy, Check, Zap } from 'lucide-react'
+import { Plus, Trash2, ExternalLink, Search, Link2, Tag, Copy, Check, Zap, BookOpen } from 'lucide-react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { usePro } from '../hooks/usePro'
 import ProUpgradeModal from '../../ProUpgradeModal'
@@ -8,6 +8,7 @@ const TAGS = ['General', 'Artículo', 'Video', 'Documento', 'Referencia', 'Herra
 
 export default function LinksVault() {
     const [links, setLinks] = useLocalStorage('sd_links', [])
+    const [subjects] = useLocalStorage('sd_subjects', [])  // synced with GradeCalc
     const { isPro } = usePro()
     const [showUpgrade, setShowUpgrade] = useState(false)
     const [url, setUrl] = useState('')
@@ -75,7 +76,7 @@ export default function LinksVault() {
         )
 
     return (
-        <div className="page-container">
+        <div className="page-container animate-fade-in">
             {showUpgrade && <ProUpgradeModal onClose={() => setShowUpgrade(false)} />}
             <div className="page-header">
                 <div>
@@ -119,13 +120,22 @@ export default function LinksVault() {
                         onChange={e => setTitle(e.target.value)}
                         placeholder="Título (opcional)"
                     />
-                    <input
-                        className="panel-input"
-                        style={{ flex: '1 1 120px' }}
-                        value={subject}
-                        onChange={e => setSubject(e.target.value)}
-                        placeholder="Materia"
-                    />
+                    {subjects.length > 0 ? (
+                        <select
+                            className="panel-select"
+                            style={{ flex: '1 1 150px' }}
+                            value={subject}
+                            onChange={e => setSubject(e.target.value)}
+                        >
+                            <option value="">— Sin materia —</option>
+                            {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                    ) : (
+                        <div style={{ flex: '1 1 150px', display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', background: 'var(--bg-hover)', borderRadius: '10px', border: '1px dashed var(--border-default)', fontSize: '12px', color: 'var(--text-4)', fontWeight: 600 }}>
+                            <BookOpen size={14} />
+                            <span>Crea materias en Calculadora</span>
+                        </div>
+                    )}
                     <select className="panel-select" value={tag} onChange={e => setTag(e.target.value)}>
                         {TAGS.map(t => <option key={t}>{t}</option>)}
                     </select>

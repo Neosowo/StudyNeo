@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { db } from '../../firebase'
 import { doc, getDoc } from 'firebase/firestore'
+import { sanitize } from '../../utils/sanitize'
 import {
     Globe, Lock, FileText, Edit3, Lightbulb, Calendar, Book, Target,
     Flame, Monitor, FlaskConical, Palette, Rocket, Star, Sprout
@@ -45,7 +46,7 @@ export default function NoteShare({ noteId }) {
                 const noteRef = doc(db, 'shared_notes', String(noteId))
                 const snap = await getDoc(noteRef)
                 if (snap.exists()) {
-                  
+
                     setNote({ id: snap.id, ...snap.data() })
                 } else {
                     console.warn("[NoteShare] La nota no existe en Firestore:", noteId)
@@ -133,7 +134,7 @@ export default function NoteShare({ noteId }) {
                 <div
                     className="notion-content"
                     style={{ fontSize: '1.125rem', lineHeight: 1.8, color: 'var(--text-2)' }}
-                    dangerouslySetInnerHTML={{ __html: note.body || '' }}
+                    dangerouslySetInnerHTML={{ __html: sanitize(note.body || '') }}
                 />
             </main>
 

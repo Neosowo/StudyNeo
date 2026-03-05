@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ArrowRight, Terminal, Plus, X, Check, Flame } from 'lucide-react'
 
 const metrics = [
-    { value: '10', label: 'Herramientas integradas' },
+    { value: '12', label: 'Herramientas integradas' },
     { value: 'GRATIS', label: 'Con limitaciones' },
     { value: 'PRO', label: 'Plan Gratis & Premium' },
 ]
@@ -54,18 +54,18 @@ export default function Hero({ onAcceder }) {
                                 animation: 'pulse 2s ease-in-out infinite',
                             }} />
                             <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 700, color: 'var(--accent)', letterSpacing: '0.15em' }}>
-                                StudyNeo Betav1.8
+                                StudyNeo Betav2.0
                             </span>
                         </div>
 
                         <h1 className="hero-title fade-up-2">
-                            Tu espacio<br />
+                            Tu bóveda<br />
                             <span style={{ color: 'var(--accent)' }}>de estudio</span><br />
-                            dinámico
+                            blindada
                         </h1>
 
                         <p className="hero-desc fade-up-3">
-                            Notas, flashcards, tareas, calendario y Pomodoro en un solo lugar. Estudia sin distracciones desde cualquier dispositivo.
+                            La plataforma All-in-One para estudiantes de alto rendimiento. Betav2.0 con seguridad reforzada, reproductor integrado y sincronización en tiempo real.
                         </p>
 
                         <div className="hero-actions fade-up-4">

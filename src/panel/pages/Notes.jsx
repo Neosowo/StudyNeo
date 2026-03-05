@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { db } from '../../firebase'
 import { doc, setDoc, deleteDoc, getDoc } from 'firebase/firestore'
+import { sanitize } from '../../utils/sanitize'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { useProContext } from '../../ProContext'
 import { useTheme } from '../../ThemeContext'
@@ -114,13 +115,13 @@ export default function Notes({ user, updateUser }) {
     }
 
     const deleteNote = (id) => {
-      
+
         if (!id) return
         if (!confirm('¿Seguro que quieres borrar esta página y todo su contenido?')) return
 
         setNotes(prev => {
             const next = prev.filter(n => n.id !== id)
-            
+
             return next
         })
 
@@ -152,10 +153,11 @@ export default function Notes({ user, updateUser }) {
             try {
                 await setDoc(noteRef, {
                     title: editTitle,
-                    body: editorRef.current?.innerHTML || activeNote.body,
+                    body: sanitize(editorRef.current?.innerHTML || activeNote.body),
                     icon: editIcon,
                     updatedAt: new Date().toISOString(),
                     author: user?.name || 'Estudiante',
+                    authorId: user?.uid,
                     theme: theme
                 })
                 alert('Nota publicada con éxito. Ahora puedes copiar el link.')

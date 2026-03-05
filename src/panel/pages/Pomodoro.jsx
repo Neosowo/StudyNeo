@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Play, Pause, RotateCcw, Coffee, Zap, SkipForward, VolumeX, CloudRain, Trees, Brain, Sofa } from 'lucide-react'
+import { Play, Pause, RotateCcw, Coffee, Zap, SkipForward, VolumeX, CloudRain, Trees, Brain, Sofa, Minimize2 } from 'lucide-react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { useProContext } from '../../ProContext'
 import ProUpgradeModal from '../../ProUpgradeModal'
+import { useWidgets } from '../components/FloatingWidgets'
 
 const AMBIENT_SOUNDS = [
     { id: 'none', label: 'Silencio', icon: VolumeX },
@@ -17,15 +18,28 @@ const MODES = {
     long: { label: 'Descanso largo', minutes: 15, color: 'var(--orange)', icon: Sofa },
 }
 
+// Shared pomo state in localStorage so the floating widget reads the same data
+const POMO_STATE_KEY = 'sd_pomo_live'
+
+export function getPomodoroLiveState() {
+    try { return JSON.parse(localStorage.getItem(POMO_STATE_KEY) || 'null') } catch { return null }
+}
+
 export default function Pomodoro() {
     const { isPro } = useProContext()
+    const { openWidget, closeWidget } = useWidgets()
     const [showUpgrade, setShowUpgrade] = useState(false)
     const [sessions, setSessions] = useLocalStorage('sd_pomodoro_sessions', 0)
     const [soundEnabled] = useLocalStorage('sd_sound_enabled', true)
-    const [mode, setMode] = useState('focus')
-    const [secondsLeft, setSecondsLeft] = useState(MODES.focus.minutes * 60)
-    const [running, setRunning] = useState(false)
-    const [pomosThisRound, setPomosThisRound] = useState(0)
+
+    // Initialize directly from localStorage so no race with persist effect
+    const [mode, setMode] = useState(() => getPomodoroLiveState()?.mode || 'focus')
+    const [secondsLeft, setSecondsLeft] = useState(() => {
+        const s = getPomodoroLiveState()
+        return s?.secondsLeft ?? MODES[s?.mode || 'focus'].minutes * 60
+    })
+    const [running, setRunning] = useState(false) // never auto-start; let user resume
+    const [pomosThisRound, setPomosThisRound] = useState(() => getPomodoroLiveState()?.pomosThisRound ?? 0)
     const [activeSound, setActiveSound] = useState('none')
     const intervalRef = useRef(null)
     const audioRef = useRef(null)
@@ -42,6 +56,27 @@ export default function Pomodoro() {
         const sec = s % 60
         return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
     }
+
+    // ─── Persist live state to localStorage (shared with floating widget) ─────
+    useEffect(() => {
+        localStorage.setItem(POMO_STATE_KEY, JSON.stringify({ mode, secondsLeft, running, pomosThisRound }))
+    }, [mode, secondsLeft, running, pomosThisRound])
+
+    // ─── On mount: close floating widget (we're on the full page now) ─────────
+    useEffect(() => {
+        closeWidget('pomodoro')
+    }, []) // eslint-disable-line
+
+    // ─── On unmount: if running → open floating widget ──────────────────────
+    useEffect(() => {
+        return () => {
+            const saved = getPomodoroLiveState()
+            if (saved?.running) {
+                // Small delay to let Panel finish navigating before spawning widget
+                setTimeout(() => openWidget('pomodoro'), 50)
+            }
+        }
+    }, []) // eslint-disable-line
 
     const changeMode = useCallback((m) => {
         setRunning(false)
@@ -68,10 +103,7 @@ export default function Pomodoro() {
     }
 
     const handleSoundChange = (id) => {
-        if (!isPro) {
-            setShowUpgrade(true)
-            return
-        }
+        if (!isPro) { setShowUpgrade(true); return }
         if (activeSound === id) {
             setActiveSound('none')
             if (audioRef.current) audioRef.current.pause()
@@ -83,19 +115,14 @@ export default function Pomodoro() {
     useEffect(() => {
         if (activeSound !== 'none' && running) {
             const sound = AMBIENT_SOUNDS.find(s => s.id === activeSound)
-            if (sound && sound.url) {
-                if (!audioRef.current) {
-                    audioRef.current = new Audio(sound.url)
-                    audioRef.current.loop = true
-                }
+            if (sound?.url) {
+                if (!audioRef.current) { audioRef.current = new Audio(sound.url); audioRef.current.loop = true }
                 audioRef.current.src = sound.url
-                audioRef.current.play().catch(e => console.log("Audio play blocked"))
+                audioRef.current.play().catch(() => { })
                 audioRef.current.volume = 0.3
             }
         } else {
-            if (audioRef.current) {
-                audioRef.current.pause()
-            }
+            audioRef.current?.pause()
         }
     }, [activeSound, running])
 
@@ -106,21 +133,16 @@ export default function Pomodoro() {
                     if (s <= 1) {
                         clearInterval(intervalRef.current)
                         setRunning(false)
-                        // Auto-advance
                         if (mode === 'focus') {
                             const newPomos = pomosThisRound + 1
                             setPomosThisRound(newPomos)
                             setSessions(prev => prev + 1)
                             const nextMode = newPomos % 4 === 0 ? 'long' : 'short'
-                            if (soundEnabled) {
-                                new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3').play().catch(() => { })
-                            }
+                            if (soundEnabled) new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3').play().catch(() => { })
                             setMode(nextMode)
                             return MODES[nextMode].minutes * 60
                         } else {
-                            if (soundEnabled) {
-                                new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3').play().catch(() => { })
-                            }
+                            if (soundEnabled) new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3').play().catch(() => { })
                             setMode('focus')
                             return MODES.focus.minutes * 60
                         }
@@ -134,7 +156,7 @@ export default function Pomodoro() {
         return () => clearInterval(intervalRef.current)
     }, [running, mode])
 
-    // Update title bar
+    // Title bar while timer runs
     useEffect(() => {
         document.title = running ? `${formatTime(secondsLeft)} — ${current.label}` : 'StudyNeo'
         return () => { document.title = 'StudyNeo' }
@@ -149,9 +171,26 @@ export default function Pomodoro() {
                     <h1 className="page-title">Modo Pomodoro</h1>
                     <p className="page-subtitle">Técnica de concentración por intervalos</p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-3)' }}>
-                    <Zap size={14} color="var(--orange)" />
-                    {sessions} sesiones totales
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-3)' }}>
+                        <Zap size={14} color="var(--orange)" />
+                        {sessions} sesiones
+                    </div>
+                    {/* Minimize to floating widget */}
+                    <button
+                        onClick={() => { openWidget('pomodoro'); }}
+                        title="Mini ventana"
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                            padding: '7px 14px', borderRadius: '10px', border: '1px solid var(--border-subtle)',
+                            background: 'var(--bg-elevated)', color: 'var(--text-3)',
+                            cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', fontWeight: 700, transition: 'all 0.18s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-border)'; e.currentTarget.style.color = 'var(--accent)' }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.color = 'var(--text-3)' }}
+                    >
+                        <Minimize2 size={13} /> Mini
+                    </button>
                 </div>
             </div>
 
@@ -175,9 +214,7 @@ export default function Pomodoro() {
             {/* Circle timer */}
             <div className="pomodoro-circle-wrap">
                 <svg width="260" height="260" viewBox="0 0 260 260">
-                    {/* Track */}
                     <circle cx="130" cy="130" r={radius} fill="none" stroke="var(--bg-hover-2)" strokeWidth="12" />
-                    {/* Progress */}
                     <circle
                         cx="130" cy="130" r={radius}
                         fill="none"
@@ -238,7 +275,7 @@ export default function Pomodoro() {
                 ))}
             </div>
 
-            {/* Ambient Sound Selector - PRO ONLY */}
+            {/* Ambient Sound Selector */}
             <div style={{ marginTop: '2.5rem', width: '100%', maxWidth: '480px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                     <div style={{ padding: '4px 8px', borderRadius: '6px', background: 'var(--accent)', color: 'white', fontSize: '10px', fontWeight: 900 }}>PRO</div>

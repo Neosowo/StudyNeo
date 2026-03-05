@@ -14,6 +14,7 @@ const features = [
         description: 'Interfaz diseñada para el foco total. Sin notificaciones, sin distracciones, sin anuncios. Solo tú y tu estudio.',
         tag: 'Zero distracción',
     },
+
 ]
 
 export default function Features({ onAcceder }) {

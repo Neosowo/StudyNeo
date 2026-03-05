@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Trash2, CheckSquare, Circle, Tag, Share2, Users, X, UserPlus, Mail, Settings, Check, BookOpen, Zap, Volume2 } from 'lucide-react'
+import { Plus, Trash2, CheckSquare, Circle, Tag, Share2, Users, X, UserPlus, Mail, Settings, Check, BookOpen, Zap, Volume2, Minimize2 } from 'lucide-react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { useProContext } from '../../ProContext'
 import ProUpgradeModal from '../../ProUpgradeModal'
+import { useWidgets } from '../components/FloatingWidgets'
 
 export default function Tasks() {
     const [tasks, setTasks] = useLocalStorage('sd_tasks', [])
     const [subjects, setSubjects] = useLocalStorage('sd_subjects', [])
     const [soundEnabled] = useLocalStorage('sd_sound_enabled', true)
     const { isPro } = useProContext()
+    const { openWidget } = useWidgets()
     const [showUpgrade, setShowUpgrade] = useState(false)
 
     // Audio system
@@ -119,6 +121,9 @@ export default function Tasks() {
                     <p className="page-subtitle" style={{ color: 'var(--text-4)' }}>{pending} pendientes · {doneCount} completadas</p>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="icon-action-btn" onClick={() => openWidget('tasks')} title="Mini ventana de tareas">
+                        <Minimize2 size={18} />
+                    </button>
                     <button className="icon-action-btn" onClick={() => setShowSubjectManager(true)} title="Gestionar materias">
                         <Settings size={18} />
                     </button>

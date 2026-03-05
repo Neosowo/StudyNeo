@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Plus, Trash2, RotateCcw, ChevronLeft, ChevronRight, Check, X, Brain, Zap, PartyPopper, Volume2 } from 'lucide-react'
+import { Plus, Trash2, RotateCcw, ChevronLeft, ChevronRight, Check, X, Brain, Zap, PartyPopper, Volume2, Minimize2 } from 'lucide-react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { useProContext } from '../../ProContext'
 import ProUpgradeModal from '../../ProUpgradeModal'
+import { useWidgets } from '../components/FloatingWidgets'
 
 function FlipCard({ card, onResult, onFlip }) {
     const [flipped, setFlipped] = useState(false)
@@ -49,6 +50,7 @@ export default function Flashcards() {
     const [decks, setDecks] = useLocalStorage('sd_flashcard_decks', [])
     const [soundEnabled] = useLocalStorage('sd_sound_enabled', true)
     const { isPro } = useProContext()
+    const { openWidget } = useWidgets()
     const [showUpgrade, setShowUpgrade] = useState(false)
 
     const playSound = (url) => {
@@ -187,6 +189,13 @@ export default function Flashcards() {
                     <h1 className="page-title">Flashcards</h1>
                     <p className="page-subtitle">Sistema de repetición espaciada</p>
                 </div>
+                <button
+                    onClick={() => openWidget('flashcards', activeDeck ? { deckId: activeDeck } : {})}
+                    title="Mini repaso"
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10, border: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)', color: 'var(--text-3)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700 }}
+                >
+                    <Minimize2 size={13} /> Mini repaso
+                </button>
             </div>
 
             {!isPro && (

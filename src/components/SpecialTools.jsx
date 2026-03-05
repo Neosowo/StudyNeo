@@ -1,4 +1,4 @@
-import { FileText, Brain, CheckSquare, Timer, Calendar, Flame, BarChart2, Link2, Settings, ArrowRight, Calculator } from 'lucide-react'
+import { FileText, Brain, CheckSquare, Timer, Calendar, Flame, BarChart2, Link2, Settings, ArrowRight, Calculator, Music } from 'lucide-react'
 
 const tools = [
     {
@@ -61,6 +61,12 @@ const tools = [
         description: 'Personaliza tu experiencia: nombre de usuario, elige entre 8 temas, tiempos Pomodoro y más.',
         tag: 'En el panel',
     },
+    {
+        icon: Music,
+        title: 'Reproductor',
+        description: 'Escucha música de YouTube, SoundCloud o Spotify mientras estudias. ¡Pruebalo gratis los primeros 2 días!',
+        tag: 'NUEVO',
+    },
 ]
 
 export default function SpecialTools({ onAcceder }) {
@@ -73,7 +79,7 @@ export default function SpecialTools({ onAcceder }) {
                     <div className="tools-header-left">
                         <div className="section-label">Todo en uno</div>
                         <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, color: 'var(--text-1)', letterSpacing: '-0.03em', lineHeight: 1.05 }}>
-                            10 herramientas,<br /><span style={{ color: 'var(--accent)' }}>un solo panel</span>
+                            12 herramientas,<br /><span style={{ color: 'var(--accent)' }}>un solo panel</span>
                         </h2>
                     </div>
                     <p style={{ color: 'var(--text-3)', fontSize: '0.875rem', lineHeight: 1.7, maxWidth: '18rem' }}>

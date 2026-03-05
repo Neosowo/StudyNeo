@@ -1,29 +1,87 @@
 import { useState } from 'react'
-import { Check, Save, Camera, Lock, Coffee, Sparkles, X, Zap, Star } from 'lucide-react'
+import { Check, Save, Camera, Lock, Coffee, Sparkles, X, Zap, Star, Eye } from 'lucide-react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
-import { useTheme, THEMES } from '../../ThemeContext'
+import { useTheme, THEMES, getBaseTheme } from '../../ThemeContext'
 import { useProContext } from '../../ProContext'
-
+import { useSfx } from '../hooks/useSfx'
 
 import ProUpgradeModal from '../../ProUpgradeModal'
 
-// ── Theme card ─────────────────────────────────────────────────────────────────
-function ThemeCard({ themeData, isActive, onSelect, onLocked, isPro }) {
+// ── Theme Preview Modal ────────────────────────────────────────────────────────
+function ThemePreview({ themeData, onApply, onClose, isPro }) {
     const { id, name, emoji, preview, premium } = themeData
     const locked = premium && !isPro
+    return (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1.5px solid var(--border-subtle)', borderRadius: '24px', width: '100%', maxWidth: '440px', overflow: 'hidden', boxShadow: '0 24px 70px rgba(0,0,0,0.5)' }}>
+                {/* Title bar */}
+                <div style={{ padding: '1.25rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '1.25rem' }}>{emoji}</span>
+                        <span style={{ fontWeight: 900, fontSize: '1rem', color: 'var(--text-1)' }}>{name}</span>
+                        {locked && <span style={{ fontSize: '0.5625rem', fontWeight: 800, background: 'var(--accent)', color: 'white', padding: '2px 7px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Pro</span>}
+                    </div>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-4)', display: 'flex', padding: '4px', borderRadius: '8px' }}><X size={20} /></button>
+                </div>
 
+                {/* Live preview */}
+                <div style={{ padding: '1.5rem', background: preview.bg }}>
+                    {/* Mock sidebar + content */}
+                    <div style={{ display: 'flex', gap: '10px', borderRadius: '16px', overflow: 'hidden', height: '180px' }}>
+                        <div style={{ width: '56px', background: preview.surface, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0', gap: '10px', flexShrink: 0 }}>
+                            {[0.9, 0.6, 0.6, 0.5, 0.4].map((op, i) => (
+                                <div key={i} style={{ width: '28px', height: '4px', borderRadius: '3px', background: i === 0 ? preview.accent : preview.text, opacity: op }} />
+                            ))}
+                        </div>
+                        <div style={{ flex: 1, background: preview.bg, padding: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ height: '10px', borderRadius: '4px', background: preview.text, opacity: 0.9, width: '45%' }} />
+                            <div style={{ height: '6px', borderRadius: '4px', background: preview.text, opacity: 0.35, width: '70%' }} />
+                            <div style={{ height: '48px', borderRadius: '10px', background: preview.surface, marginTop: '4px', border: `1px solid ${preview.accent}25`, display: 'flex', alignItems: 'center', padding: '0 12px', gap: '8px' }}>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: preview.accent }} />
+                                <div style={{ height: '5px', borderRadius: '3px', background: preview.text, opacity: 0.5, flex: 1 }} />
+                            </div>
+                            <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                                <div style={{ padding: '6px 14px', borderRadius: '8px', background: preview.accent, fontSize: '9px', fontWeight: 700, color: preview.bg }}>Guardar</div>
+                                <div style={{ padding: '6px 14px', borderRadius: '8px', background: preview.surface, fontSize: '9px', fontWeight: 700, color: preview.text, opacity: 0.7 }}>Cancelar</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Action */}
+                <div style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {locked ? (
+                        <>
+                            <p style={{ fontSize: '0.8125rem', color: 'var(--text-3)', textAlign: 'center' }}>Este tema exclusivo requiere el <strong>Plan Pro</strong> para aplicarse.</p>
+                            <button onClick={onApply} style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, var(--accent), var(--accent-2))', color: 'white', fontWeight: 900, fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'inherit' }}>
+                                <Zap size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} /> Desbloquear con Pro
+                            </button>
+                        </>
+                    ) : (
+                        <button onClick={onApply} style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: 'white', fontWeight: 900, fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'inherit' }}>
+                            <Check size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} /> Aplicar tema
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// ── Theme card ─────────────────────────────────────────────────────────────────
+function ThemeCard({ themeData, isActive, onPreview }) {
+    const { id, name, emoji, preview, premium } = themeData
     return (
         <button
-            onClick={() => locked ? onLocked(themeData) : onSelect(id)}
+            onClick={() => onPreview(themeData)}
             style={{
                 display: 'flex', flexDirection: 'column', gap: '0.625rem',
                 padding: '1rem', borderRadius: '12px', cursor: 'pointer',
                 fontFamily: 'inherit', textAlign: 'left',
                 background: isActive ? 'var(--accent-dim)' : 'var(--bg-elevated)',
-                border: isActive ? '2px solid var(--accent)' : locked ? '2px dashed var(--border-default)' : '2px solid var(--border-default)',
+                border: isActive ? '2px solid var(--accent)' : '2px solid var(--border-default)',
                 transition: 'all 0.18s ease',
                 position: 'relative', overflow: 'hidden', width: '100%',
-                opacity: locked ? 0.72 : 1,
             }}
         >
             {/* Preview bar */}
@@ -31,16 +89,14 @@ function ThemeCard({ themeData, isActive, onSelect, onLocked, isPro }) {
                 <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '28%', background: preview.surface, borderRight: `1px solid ${preview.accent}20` }} />
                 <div style={{ position: 'absolute', left: '28%', top: 0, right: 0, bottom: 0, padding: '6px' }}>
                     <div style={{ height: '5px', borderRadius: '3px', background: preview.text, opacity: 0.8, width: '50%' }} />
+                    <div style={{ height: '3px', borderRadius: '3px', background: preview.accent, opacity: 0.6, width: '35%', marginTop: '4px' }} />
                 </div>
-                {/* Lock overlay */}
-                {locked && (
-                    <div style={{
-                        position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
-                        justifyContent: 'center', background: 'rgba(0,0,0,0.38)', borderRadius: '8px'
-                    }}>
-                        <Lock size={18} color="rgba(255,255,255,0.9)" />
-                    </div>
+                {premium && (
+                    <div style={{ position: 'absolute', top: '4px', right: '4px', background: 'var(--accent)', borderRadius: '4px', padding: '1px 5px', fontSize: '8px', fontWeight: 800, color: 'white', letterSpacing: '0.05em' }}>PRO</div>
                 )}
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0)', transition: 'background 0.2s' }} className="theme-hover-overlay">
+                    <Eye size={14} color="rgba(255,255,255,0.8)" style={{ opacity: 0 }} className="theme-eye-icon" />
+                </div>
             </div>
             {/* Name row */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -49,11 +105,6 @@ function ThemeCard({ themeData, isActive, onSelect, onLocked, isPro }) {
                     <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-1)' }}>{name}</span>
                 </div>
                 {isActive && <Check size={14} color="var(--accent)" />}
-                {locked && (
-                    <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--accent)', background: 'var(--accent-dim)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--accent-border)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                        Pro
-                    </span>
-                )}
             </div>
         </button>
     )
@@ -113,7 +164,7 @@ function ProSection({ isPro, loading, error, activateCode, setError }) {
     )
 
     const freeF = ['Hasta 10 notas', 'Hasta 15 tareas', 'Hasta 10 flashcards', 'Hasta 3 hábitos', 'Hasta 10 enlaces web']
-    const proF = ['Bóveda de Todo Ilimitada', 'Acceso sin conexión (Offline)', 'Auto-guardado rápido (1 min)', 'Temporizador personalizado', '6 temas premium exclusivos']
+    const proF = ['Bóveda de Todo Ilimitada', 'Acceso sin conexión (Offline)', 'Auto-guardado rápido (1 min)', 'Herramientas Pro (Matriz, Cronómetro...)', '11 temas premium exclusivos']
 
     // ─ No tiene Pro ─────────────────────────────────────────────────────────
     return (
@@ -187,27 +238,51 @@ export default function Settings({ user, updateUser }) {
     const [photoURL, setPhotoURL] = useState(user?.photoURL || '')
     const [savedName, setSavedName] = useState(false)
     const [savedPhoto, setSavedPhoto] = useState(false)
+    const [previewTheme, setPreviewTheme] = useState(null)
     const [lockedThemeModal, setLockedThemeModal] = useState(false)
+    const { play } = useSfx()
 
     const handleSaveName = () => {
         if (!displayName.trim()) return
         updateUser({ name: displayName.trim() })
         setSavedName(true)
+        play('success')
         setTimeout(() => setSavedName(false), 2000)
     }
 
     const handleSavePhoto = () => {
         updateUser({ photoURL: photoURL.trim() })
         setSavedPhoto(true)
+        play('success')
         setTimeout(() => setSavedPhoto(false), 2000)
+    }
+
+    const handleToggleSound = () => { setSoundEnabled(!soundEnabled); play('toggle') }
+
+    const handlePreview = (t) => { play('pop'); setPreviewTheme(t) }
+    const handleApplyTheme = () => {
+        if (!previewTheme) return
+        if (previewTheme.premium && !isPro) { setPreviewTheme(null); setLockedThemeModal(true); return }
+        setTheme(previewTheme.id)
+        play('success')
+        setPreviewTheme(null)
     }
 
     const darkThemes = THEMES.filter(t => t.category === 'Oscuro')
     const lightThemes = THEMES.filter(t => t.category === 'Claro')
+    const activeBaseTheme = getBaseTheme(theme)
 
     return (
         <div className="page-container">
             {lockedThemeModal && <ProUpgradeModal onClose={() => setLockedThemeModal(false)} />}
+            {previewTheme && (
+                <ThemePreview
+                    themeData={previewTheme}
+                    isPro={isPro}
+                    onApply={handleApplyTheme}
+                    onClose={() => setPreviewTheme(null)}
+                />
+            )}
 
             <div className="page-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -251,7 +326,7 @@ export default function Settings({ user, updateUser }) {
                 <SettingRow label="Efectos de Sonido" sub="Sonidos satisfactorios al completar tareas">
                     <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '8px' }}>
                         <div
-                            onClick={() => setSoundEnabled(!soundEnabled)}
+                            onClick={handleToggleSound}
                             style={{
                                 width: '48px', height: '26px', borderRadius: '13px',
                                 background: soundEnabled ? 'var(--accent)' : 'var(--bg-hover-2)',
@@ -286,8 +361,8 @@ export default function Settings({ user, updateUser }) {
             <Section title="🎨 Apariencia">
                 {!isPro && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', padding: '0.625rem 0.875rem', background: 'var(--accent-dim)', borderRadius: '8px', border: '1px solid var(--accent-border)' }}>
-                        <Lock size={13} color="var(--accent)" />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)' }}>6 temas adicionales disponibles con Plan Pro</span>
+                        <Eye size={13} color="var(--accent)" />
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)' }}>Haz clic en cualquier tema para previsualizarlo antes de aplicarlo</span>
                     </div>
                 )}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.75rem' }}>
@@ -295,16 +370,58 @@ export default function Settings({ user, updateUser }) {
                         <ThemeCard
                             key={t.id}
                             themeData={t}
-                            isActive={theme === t.id}
+                            isActive={activeBaseTheme?.id === t.id}
                             isPro={isPro}
-                            onSelect={(id) => {
-                                if (t.premium && !isPro) { setLockedThemeModal(true); return }
-                                setTheme(id)
-                            }}
-                            onLocked={() => setLockedThemeModal(true)}
+                            onPreview={handlePreview}
                         />
                     ))}
                 </div>
+
+                {/* Variant picker — shows when active theme has variants */}
+                {activeBaseTheme?.variants && activeBaseTheme.variants.length > 1 && (
+                    <div style={{ padding: '1rem', background: 'var(--bg-hover)', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
+                        <p style={{ fontSize: '0.6875rem', fontWeight: 800, color: 'var(--text-4)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>
+                            {activeBaseTheme.emoji} Variantes de {activeBaseTheme.name}
+                        </p>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {activeBaseTheme.variants.map(v => {
+                                const isVariantActive = theme === v.id
+                                const locked = activeBaseTheme.premium && !isPro
+                                return (
+                                    <button
+                                        key={v.id}
+                                        onClick={() => {
+                                            if (locked) { setLockedThemeModal(true); return }
+                                            setTheme(v.id); play('pop')
+                                        }}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '8px',
+                                            padding: '8px 14px', borderRadius: '10px', border: 'none',
+                                            cursor: locked ? 'not-allowed' : 'pointer',
+                                            background: isVariantActive ? 'var(--accent)' : 'var(--bg-elevated)',
+                                            color: isVariantActive ? 'white' : 'var(--text-2)',
+                                            fontWeight: 700, fontSize: '12px', fontFamily: 'inherit',
+                                            transition: 'all 0.18s',
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', gap: '3px' }}>
+                                            {[v.preview.bg, v.preview.accent, v.preview.text].map((c, i) => (
+                                                <div key={i} style={{ width: '10px', height: '10px', borderRadius: '50%', background: c, border: '1px solid rgba(255,255,255,0.2)' }} />
+                                            ))}
+                                        </div>
+                                        {v.label}
+                                        {isVariantActive && <Check size={11} />}
+                                        {locked && <Lock size={10} />}
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    </div>
+                )}
+                <style>{`
+                    .theme-card-btn:hover .theme-hover-overlay { background: rgba(0,0,0,0.25) !important; }
+                    .theme-card-btn:hover .theme-eye-icon { opacity: 1 !important; }
+                `}</style>
             </Section>
 
             <Section title="⏱️ Temporizador">

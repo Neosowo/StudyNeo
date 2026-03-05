@@ -11,8 +11,14 @@ import Habits from './pages/Habits'
 import Stats from './pages/Stats'
 import Settings from './pages/Settings'
 import GradeCalc from './pages/GradeCalc'
-import { Menu, X, WifiOff, Zap } from 'lucide-react'
+import Eisenhower from './pages/Eisenhower'
+import MusicQueue from './pages/MusicQueue'
+import BrainJournal from './pages/BrainJournal'
+import Community from './pages/Community'
+import { Menu, X, WifiOff, Zap, Lock } from 'lucide-react'
 import { useProContext } from '../ProContext'
+import { WidgetProvider } from './components/FloatingWidgets'
+import { AudioPlayerProvider } from './context/AudioPlayerContext'
 
 const PAGES = {
     dashboard: Dashboard,
@@ -25,16 +31,20 @@ const PAGES = {
     stats: Stats,
     links: LinksVault,
     gradecalc: GradeCalc,
+    eisenhower: Eisenhower,
+    spotify: MusicQueue,
+    bitacora: BrainJournal,
+    community: Community,
     settings: Settings,
 }
 
-const FULL_HEIGHT_PAGES = ['notes', 'calendar']
+const FULL_HEIGHT_PAGES = ['notes', 'calendar', 'flashcards']
 
-export default function Panel({ onExit, user, updateUser }) {
+export default function Panel({ user, onExit, updateUser }) {
     const { isPro } = useProContext()
     const [activePage, setActivePage] = useState('dashboard')
-    const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024)
-    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+    const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
     const [isOffline, setIsOffline] = useState(!navigator.onLine)
 
     useEffect(() => {
@@ -44,7 +54,7 @@ export default function Panel({ onExit, user, updateUser }) {
         window.addEventListener('offline', handleOffline)
 
         const handleResize = () => {
-            const mobile = window.innerWidth <= 768
+            const mobile = window.innerWidth < 1024
             setIsMobile(mobile)
             if (mobile) setSidebarOpen(false)
             else if (window.innerWidth > 1024) setSidebarOpen(true)
@@ -93,50 +103,52 @@ export default function Panel({ onExit, user, updateUser }) {
     }
 
     return (
-        <div className={`panel-root ${sidebarOpen ? 'sidebar-open' : ''} ${isMobile ? 'is-mobile' : ''}`}>
-            {isMobile && !sidebarOpen && (
-                <button
-                    className="mobile-toggle-btn"
-                    onClick={() => setSidebarOpen(true)}
-                    style={{
-                        position: 'fixed', top: '16px', left: '16px', zIndex: 1001,
-                        background: 'var(--accent)', color: 'white', border: 'none',
-                        padding: '10px', borderRadius: '12px', display: 'flex',
-                        boxShadow: '0 4px 15px var(--accent-dim)',
-                        backdropFilter: 'blur(10px)',
-                    }}
-                >
-                    <Menu size={22} />
-                </button>
-            )}
+        <WidgetProvider>
+            <AudioPlayerProvider>
+                <div className={`panel-root ${sidebarOpen ? 'sidebar-open' : ''} ${isMobile ? 'is-mobile' : ''}`}>
+                    {isMobile && !sidebarOpen && (
+                        <button
+                            className="mobile-toggle-btn"
+                            onClick={() => setSidebarOpen(true)}
+                            style={{
+                                position: 'fixed', top: '16px', left: '16px', zIndex: 1001,
+                                background: 'var(--accent)', color: 'white', border: 'none',
+                                padding: '10px', borderRadius: '12px', display: 'flex',
+                                boxShadow: '0 4px 15px var(--accent-dim)',
+                                backdropFilter: 'blur(10px)',
+                            }}
+                        >
+                            <Menu size={22} />
+                        </button>
+                    )}
 
-            <Sidebar
-                active={activePage}
-                onNavigate={handleNavigate}
-                onExit={onExit}
-                open={sidebarOpen}
-                onToggle={() => setSidebarOpen(o => !o)}
-                user={user}
-                isMobile={isMobile}
-            />
+                    <Sidebar
+                        active={activePage}
+                        onNavigate={handleNavigate}
+                        onExit={onExit}
+                        open={sidebarOpen}
+                        onToggle={() => setSidebarOpen(o => !o)}
+                        user={user}
+                        isMobile={isMobile}
+                    />
 
-            {isMobile && sidebarOpen && (
-                <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
-            )}
+                    {isMobile && sidebarOpen && (
+                        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+                    )}
 
-            <main
-                className="panel-main"
-                style={{
-                    marginLeft: (sidebarOpen && !isMobile) ? (window.innerWidth > 1024 ? '240px' : '64px') : '0',
-                    transition: 'margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                    width: (sidebarOpen && !isMobile) ? `calc(100% - ${window.innerWidth > 1024 ? '240' : '64'}px)` : '100%',
-                    ...(isFullHeight ? { overflow: 'hidden', height: '100vh' } : {}),
-                }}
-            >
-                <PageComponent user={user} updateUser={updateUser} activePage={activePage} />
-            </main>
+                    <main
+                        className="panel-main"
+                        style={{
+                            marginLeft: isMobile ? '0' : (sidebarOpen ? '240px' : '64px'),
+                            transition: 'margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                            width: isMobile ? '100%' : `calc(100% - ${sidebarOpen ? '240' : '64'}px)`,
+                            ...(isFullHeight ? { overflow: 'hidden', height: '100vh' } : {}),
+                        }}
+                    >
+                        <PageComponent user={user} updateUser={updateUser} activePage={activePage} />
+                    </main>
 
-            <style>{`
+                    <style>{`
                 .panel-root { display: flex; min-height: 100vh; background: var(--bg-base); }
                 .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 999; animation: fadeIn 0.2s; }
                 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -149,6 +161,8 @@ export default function Panel({ onExit, user, updateUser }) {
                     }
                 }
             `}</style>
-        </div>
+                </div>
+            </AudioPlayerProvider>
+        </WidgetProvider>
     )
 }

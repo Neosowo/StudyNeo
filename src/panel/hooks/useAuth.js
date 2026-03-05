@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
-import { auth } from '../../firebase'
+import { auth, db } from '../../firebase'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
     updateProfile,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    sendEmailVerification
 } from 'firebase/auth'
 
 export function useAuth() {
@@ -25,19 +27,38 @@ export function useAuth() {
             }
         }
         window.addEventListener('storage', handleStorage)
-        return () => window.removeEventListener('storage', handleStorage)
+        return () => window.addEventListener('storage', handleStorage)
     }, [])
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
             if (firebaseUser) {
+                if (!firebaseUser.emailVerified) {
+                    setUser(null)
+                    localStorage.removeItem('sd_user')
+                    setLoading(false)
+                    return
+                }
+
                 const u = {
                     uid: firebaseUser.uid,
                     name: firebaseUser.displayName,
                     email: firebaseUser.email,
                     photoURL: firebaseUser.photoURL,
-                    createdAt: firebaseUser.metadata.creationTime
+                    createdAt: firebaseUser.metadata.creationTime,
+                    emailVerified: firebaseUser.emailVerified
                 }
+
+                // --- NUEVO: Guardar/Actualizar en Firestore ---
+                const userRef = doc(db, 'users', firebaseUser.uid)
+                setDoc(userRef, {
+                    uid: firebaseUser.uid,
+                    email: firebaseUser.email,
+                    name: firebaseUser.displayName,
+                    lastLogin: serverTimestamp()
+                }, { merge: true }).catch(err => console.error("Error al sincronizar usuario:", err))
+                // ----------------------------------------------
+
                 localStorage.setItem('sd_user', JSON.stringify(u))
                 setUser(u)
             } else {
@@ -50,14 +71,50 @@ export function useAuth() {
     }, [])
 
     const login = async (email, password) => {
+        // --- NUEVO: Sanitización y Control de Fuerza Bruta ---
+        const sanitizedEmail = email.trim().toLowerCase()
+        const attempts = parseInt(localStorage.getItem(`sd_att_${sanitizedEmail}`) || '0')
+        const lastAttempt = parseInt(localStorage.getItem(`sd_lock_${sanitizedEmail}`) || '0')
+        const now = Date.now()
+
+        // Bloqueo de 5 minutos si falló más de 5 veces
+        if (attempts >= 5 && (now - lastAttempt) < 300000) {
+            const remaining = Math.ceil((300000 - (now - lastAttempt)) / 60000)
+            return { error: `Demasiados intentos. Tu cuenta está bloqueada por ${remaining} minuto(s).` }
+        }
+
         try {
-            const result = await signInWithEmailAndPassword(auth, email, password)
+            const result = await signInWithEmailAndPassword(auth, sanitizedEmail, password)
+            if (!result.user.emailVerified) {
+                return { error: 'Por favor, verifica tu correo electrónico para continuar.', needsVerification: true }
+            }
+
+            // Resetear intentos si el login es exitoso
+            localStorage.removeItem(`sd_att_${sanitizedEmail}`)
+            localStorage.removeItem(`sd_lock_${sanitizedEmail}`)
+
+            // Registrar actividad de seguridad
+            const userRef = doc(db, 'users', result.user.uid)
+            setDoc(userRef, {
+                security: {
+                    lastIp: 'Fetching...', // Se puede mejorar con un servicio de IP
+                    userAgent: navigator.userAgent,
+                    lastActivity: serverTimestamp()
+                }
+            }, { merge: true })
+
             return { ok: true, user: result.user }
         } catch (error) {
+            // Incrementar intentos fallidos
+            localStorage.setItem(`sd_att_${sanitizedEmail}`, (attempts + 1).toString())
+            localStorage.setItem(`sd_lock_${sanitizedEmail}`, now.toString())
+
             let msg = 'Error al iniciar sesión'
             if (error.code === 'auth/user-not-found') msg = 'Usuario no encontrado'
             if (error.code === 'auth/wrong-password') msg = 'Contraseña incorrecta'
             if (error.code === 'auth/invalid-credential') msg = 'Credenciales inválidas'
+            if (error.code === 'auth/too-many-requests') msg = 'Demasiados intentos fallidos. Intenta más tarde.'
+
             return { error: msg }
         }
     }
@@ -66,15 +123,9 @@ export function useAuth() {
         try {
             const result = await createUserWithEmailAndPassword(auth, email, password)
             await updateProfile(result.user, { displayName: name })
-            const u = {
-                uid: result.user.uid,
-                name: name,
-                email: result.user.email,
-                photoURL: null
-            }
-            setUser(u)
-            localStorage.setItem('sd_user', JSON.stringify(u))
-            return { ok: true }
+            await sendEmailVerification(result.user)
+
+            return { ok: true, needsVerification: true }
         } catch (error) {
             let msg = 'Error al registrarse'
             if (error.code === 'auth/email-already-in-use') msg = 'Este correo ya está en uso'

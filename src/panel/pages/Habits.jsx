@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react'
-import { Plus, Trash2, Flame, Check, X, Zap, Book, Activity, Wind, Droplets, PersonStanding, PenTool, Target, Moon, Apple, BookOpen, Palette, Music } from 'lucide-react'
+import { Plus, Trash2, Flame, Check, X, Zap, Book, Activity, Wind, Droplets, PersonStanding, PenTool, Target, Moon, Apple, BookOpen, Palette, Music, Minimize2 } from 'lucide-react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { useProContext } from '../../ProContext'
 import ProUpgradeModal from '../../ProUpgradeModal'
+import { useWidgets } from '../components/FloatingWidgets'
 
 const HABIT_ICONS = [
     { name: 'Book', icon: Book },
@@ -70,6 +71,7 @@ export default function Habits() {
     const [habits, setHabits] = useLocalStorage('sd_habits', [])
     const [newName, setNewName] = useState('')
     const { isPro } = useProContext()
+    const { openWidget } = useWidgets()
     const [showUpgrade, setShowUpgrade] = useState(false)
     const [soundEnabled] = useLocalStorage('sd_sound_enabled', true)
     const [newIcon, setNewIcon] = useState('Book')
@@ -123,6 +125,13 @@ export default function Habits() {
                     <h1 className="page-title">Hábitos</h1>
                     <p className="page-subtitle">Hoy: {totalToday}/{habits.length} completados · {completionRate}%</p>
                 </div>
+                <button
+                    onClick={() => openWidget('habits')}
+                    title="Mini ventana de hábitos"
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10, border: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)', color: 'var(--text-3)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700 }}
+                >
+                    <Minimize2 size={13} /> Mini
+                </button>
             </div>
 
             {!isPro && (

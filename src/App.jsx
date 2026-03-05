@@ -12,6 +12,8 @@ import Privacidad from './components/Privacidad'
 import Terminos from './components/Terminos'
 import Soporte from './components/Soporte'
 import { ProProvider } from './ProContext'
+import ForgotPass from './panel/auth/ForgotPass'
+import { Mail } from 'lucide-react'
 
 function getRoute() {
   const h = window.location.hash
@@ -61,11 +63,12 @@ export default function App() {
     login: async (email, password) => {
       const result = await login(email, password)
       if (result.ok) goToPanel()
+      if (result.needsVerification) setRoute('verify-email')
       return result
     },
     register: async (name, email, password) => {
       const result = await register(name, email, password)
-      if (result.ok) goToPanel()
+      if (result.ok) setRoute('verify-email')
       return result
     },
   }
@@ -110,6 +113,37 @@ export default function App() {
   if (route === 'terminos') return <Terminos onBack={goLanding} />
   if (route === 'soporte') return <Soporte onBack={goLanding} />
   if (route === 'forgot-pass') return <ForgotPass onBack={goLanding} onReset={resetPassword} />
+
+  // Verify Email Route
+  if (route === 'verify-email') {
+    return (
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-base)', textAlign: 'center', padding: '2rem' }}>
+        <div style={{ maxWidth: '400px', background: 'var(--bg-surface)', padding: '3rem', borderRadius: '24px', border: '1px solid var(--border-subtle)', boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}>
+          <div style={{ background: 'var(--accent-dim)', width: '80px', height: '80px', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem' }}>
+            <Mail size={40} color="var(--accent)" />
+          </div>
+          <h2 style={{ fontWeight: 900, fontSize: '1.75rem', marginBottom: '1rem', color: 'var(--text-1)' }}>Verifica tu correo</h2>
+          <p style={{ color: 'var(--text-3)', fontSize: '1rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
+            Hemos enviado un enlace de seguridad a tu bandeja de entrada. Por favor, <b>haz clic en el enlace</b> para activar tu cuenta.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <button
+              onClick={() => window.location.reload()}
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'var(--accent)', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: '14px' }}
+            >
+              Ya verifiqué, entrar
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{ background: 'none', border: 'none', color: 'var(--text-4)', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}
+            >
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   // Landing page
   return (

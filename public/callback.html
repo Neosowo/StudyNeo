@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Conectando Spotify…</title>
+    <style>
+        body {
+            margin: 0; display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; background: #0f0f0f; font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            color: white;
+        }
+        .card {
+            text-align: center; padding: 2rem; border-radius: 16px;
+            background: #1a1a1a; border: 1px solid #2a2a2a; max-width: 320px;
+        }
+        .spinner { font-size: 40px; margin-bottom: 1rem; animation: pulse 1.2s ease-in-out infinite; }
+        .title { font-size: 1.125rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .sub { font-size: 0.8125rem; color: #888; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="spinner">🎵</div>
+        <div class="title" id="msg">Completando conexión…</div>
+        <div class="sub" id="sub">Guardando tu sesión de Spotify</div>
+    </div>
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search)
+            const code = params.get('code')
+            const state = params.get('state')
+            const error = params.get('error')
+
+            if (error || !code) {
+                document.getElementById('msg').textContent = 'Error al conectar'
+                document.getElementById('sub').textContent = error || 'Inténtalo de nuevo'
+                localStorage.setItem('spotify_callback_error', error || 'unknown')
+                setTimeout(() => window.close(), 2000)
+                return
+            }
+
+            // Store callback data so the opener can read it
+            localStorage.setItem('spotify_callback_code', code)
+            localStorage.setItem('spotify_callback_state', state)
+            document.getElementById('msg').textContent = '¡Conectado!'
+            document.getElementById('sub').textContent = 'Puedes cerrar esta ventana'
+
+            // Try to communicate with opener
+            try {
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({ type: 'SPOTIFY_CALLBACK', code, state }, '*')
+                }
+            } catch (e) { /* opener might be different origin, localStorage polling will handle it */ }
+
+            // Close popup after brief delay
+            setTimeout(() => {
+                try { window.close() } catch (e) { }
+            }, 1200)
+        })()
+    </script>
+</body>
+</html>
