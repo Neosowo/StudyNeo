@@ -11,6 +11,11 @@ import {
     sendEmailVerification
 } from 'firebase/auth'
 
+const isValidEmailDomain = (email) => {
+    const emailLower = email.toLowerCase().trim();
+    return emailLower.endsWith('@gmail.com') || emailLower.endsWith('@hotmail.com') || emailLower.endsWith('@outlook.com');
+};
+
 export function useAuth() {
     const [user, setUser] = useState(() => {
         const saved = localStorage.getItem('sd_user')
@@ -120,6 +125,9 @@ export function useAuth() {
     }
 
     const register = async (name, email, password) => {
+        if (!isValidEmailDomain(email)) {
+            return { error: 'Solo se permiten correos @gmail.com, @hotmail.com o @outlook.com' }
+        }
         try {
             const result = await createUserWithEmailAndPassword(auth, email, password)
             await updateProfile(result.user, { displayName: name })

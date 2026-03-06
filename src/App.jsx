@@ -124,7 +124,7 @@ export default function App() {
           </div>
           <h2 style={{ fontWeight: 900, fontSize: '1.75rem', marginBottom: '1rem', color: 'var(--text-1)' }}>Verifica tu correo</h2>
           <p style={{ color: 'var(--text-3)', fontSize: '1rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-            Hemos enviado un enlace de seguridad a tu bandeja de entrada. Por favor, <b>haz clic en el enlace</b> para activar tu cuenta.
+            Hemos enviado un enlace de seguridad a tu bandeja de entrada. Si no lo ves ahí, revisa tu bandeja de spam. Por favor, <b>haz clic en el enlace</b> para activar tu cuenta.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <button

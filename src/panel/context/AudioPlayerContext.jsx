@@ -5,6 +5,8 @@
  * • Likes system (sd_music_likes)
  */
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react'
+import { auth, db } from '../../firebase'
+import { doc, setDoc } from 'firebase/firestore'
 
 const AudioCtx = createContext({})
 export function useAudioPlayer() { return useContext(AudioCtx) }
@@ -403,8 +405,20 @@ export function AudioPlayerProvider({ children }) {
         if (key.startsWith('sd_')) {
             try {
                 const meta = JSON.parse(localStorage.getItem('sd_meta') || '{}')
-                meta[key] = new Date().toISOString()
+                const nowStr = new Date().toISOString()
+                meta[key] = nowStr
                 localStorage.setItem('sd_meta', JSON.stringify(meta))
+
+                // Force immediate sync to Firebase for queue and related keys
+                if (auth?.currentUser && ['sd_audio_queue', 'sd_audio_idx', 'sd_music_likes', 'sd_user_playlists'].includes(key)) {
+                    try {
+                        const cleanValue = JSON.parse(stringified) // Drops undefined fields automatically
+                        const docRef = doc(db, 'users', auth.currentUser.uid, 'settings', key)
+                        setDoc(docRef, { value: cleanValue, updatedAt: nowStr }, { merge: true }).catch(() => { })
+                    } catch (e) {
+                        console.error("Error al sincronizar cola", e)
+                    }
+                }
             } catch (e) { }
         }
         window.dispatchEvent(new Event('storage'))
