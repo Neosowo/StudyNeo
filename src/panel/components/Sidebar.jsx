@@ -2,7 +2,7 @@ import { useState } from 'react'
 import {
     LayoutDashboard, CheckSquare, FileText, Settings, LogOut,
     Cloud, CloudOff, User, StickyNote, Music, Zap,
-    ChevronRight, Repeat, Brain, Timer, CalendarDays,
+    ChevronRight, Repeat, Brain, Timer, Target, CalendarDays,
     Flame, TrendingUp, Link2, Calculator, Briefcase, BookOpen, Users,
     LayoutGrid, SkipBack, SkipForward, Play, Pause, X
 } from 'lucide-react'
@@ -34,6 +34,7 @@ export default function Sidebar({ active, onNavigate, onExit, open, onToggle, us
         { id: 'flashcards', label: 'Flashcards', icon: Brain },
         { id: 'tasks', label: 'Tareas', icon: CheckSquare },
         { id: 'pomodoro', label: 'Pomodoro', icon: Timer },
+        { id: 'postpone', label: 'Foco Activo', icon: Target },
         { id: 'calendar', label: 'Calendario', icon: CalendarDays },
         { id: 'habits', label: 'Hábitos', icon: Flame },
         { id: 'links', label: 'Vault', icon: Link2 },

@@ -9,6 +9,8 @@ import {
 } from 'lucide-react'
 import { useAudioPlayer } from '../context/AudioPlayerContext'
 import { useProContext } from '../../ProContext'
+import { usePostpone } from '../context/PostponeContext'
+import { Target, AlertCircle, Square } from 'lucide-react'
 
 /* ── Widget context ──────────────────────────────────────── */
 const WidgetCtx = createContext({})
@@ -164,6 +166,75 @@ function PomodoroWidget({ onClose }) {
                     {running ? <><Pause size={14} /> Pausar</> : <><Play size={14} style={{ marginLeft: 1 }} /> Iniciar</>}
                 </button>
                 <button onClick={() => { setRunning(false); setSecs(cfg.m * 60) }} style={{ padding: '9px 11px', borderRadius: 10, border: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)', color: 'var(--text-3)', fontWeight: 700, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>↺</button>
+            </div>
+        </DraggableWidget>
+    )
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WIDGET: Postpone (Foco Activo)
+═══════════════════════════════════════════════════════════ */
+function PostponeWidget({ onClose }) {
+    const {
+        currentState,
+        currentBlockElapsed,
+        handleStart,
+        handleLostFocus,
+        handleResume,
+        handleEnd,
+        formatHMS
+    } = usePostpone();
+
+    return (
+        <DraggableWidget title="Foco Activo" icon={Target} color={currentState === 'distracted' ? 'var(--red)' : 'var(--accent)'} onClose={onClose} defaultPos={{ x: window.innerWidth - 290, y: 150 }} minWidth={250}>
+            <div style={{ textAlign: 'center', marginBottom: 12 }}>
+                {currentState === 'idle' && (
+                    <p style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, padding: '10px 0' }}>Declararás tu inicio de foco real.</p>
+                )}
+                {currentState === 'working' && (
+                     <>
+                        <span style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', fontVariantNumeric: 'tabular-nums', color: 'var(--text-1)' }}>
+                            {formatHMS(currentBlockElapsed())}
+                        </span>
+                        <p style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 800, marginTop: 2, textTransform: 'uppercase' }}>Foco Activo</p>
+                    </>
+                )}
+                {currentState === 'distracted' && (
+                     <>
+                        <span style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', fontVariantNumeric: 'tabular-nums', color: 'var(--red)' }}>
+                            {formatHMS(currentBlockElapsed())}
+                        </span>
+                        <p style={{ fontSize: 10, color: 'var(--red)', fontWeight: 800, marginTop: 2, textTransform: 'uppercase' }}>Fuera de foco</p>
+                    </>
+                )}
+            </div>
+
+            <div style={{ display: 'flex', gap: 8 }}>
+                {currentState === 'idle' && (
+                    <button onClick={handleStart} style={{ flex: 1, padding: 9, borderRadius: 10, border: 'none', background: 'var(--text-1)', color: 'var(--bg-base)', fontWeight: 900, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                        <Play size={14} style={{ marginLeft: 1 }} /> Iniciar Sesión
+                    </button>
+                )}
+                {currentState === 'working' && (
+                    <>
+                        <button onClick={handleLostFocus} style={{ flex: 1, padding: 9, borderRadius: 10, border: '1px solid var(--red)', background: 'transparent', color: 'var(--red)', fontWeight: 900, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                            <AlertCircle size={14} /> Distracción
+                        </button>
+                        <button onClick={handleEnd} style={{ padding: '9px 11px', borderRadius: 10, border: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)', color: 'var(--text-3)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Square size={14} fill="currentColor" />
+                        </button>
+                    </>
+                )}
+                {currentState === 'distracted' && (
+                    <>
+                        <button onClick={handleResume} style={{ flex: 1, padding: 9, borderRadius: 10, border: 'none', background: 'var(--red)', color: 'white', fontWeight: 900, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                            <Play size={14} fill="currentColor" /> Retomar
+                        </button>
+                        <button onClick={handleEnd} style={{ padding: '9px 11px', borderRadius: 10, border: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)', color: 'var(--text-3)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Square size={14} fill="currentColor" />
+                        </button>
+                    </>
+                )}
             </div>
         </DraggableWidget>
     )
@@ -496,6 +567,7 @@ function WidgetLayer({ widgets, closeWidget }) {
         <>
             {widgets.map(w => {
                 if (w.type === 'pomodoro') return <PomodoroWidget key={w.id} data={w.data} onClose={() => closeWidget('pomodoro')} />
+                if (w.type === 'postpone') return <PostponeWidget key={w.id} data={w.data} onClose={() => closeWidget('postpone')} />
                 if (w.type === 'music') return <MusicWidget key={w.id} data={w.data} onClose={() => closeWidget('music')} />
                 if (w.type === 'quicknote') return <QuickNoteWidget key={w.id} data={w.data} onClose={() => closeWidget('quicknote')} />
                 if (w.type === 'tasks') return <TasksWidget key={w.id} data={w.data} onClose={() => closeWidget('tasks')} />

@@ -5,6 +5,7 @@ import Notes from './pages/Notes'
 import Flashcards from './pages/Flashcards'
 import Tasks from './pages/Tasks'
 import Pomodoro from './pages/Pomodoro'
+import Postpone from './pages/Postpone'
 import LinksVault from './pages/LinksVault'
 import Calendar from './pages/Calendar'
 import Habits from './pages/Habits'
@@ -19,6 +20,7 @@ import { Menu, X, WifiOff, Zap, Lock } from 'lucide-react'
 import { useProContext } from '../ProContext'
 import { WidgetProvider } from './components/FloatingWidgets'
 import { AudioPlayerProvider } from './context/AudioPlayerContext'
+import { PostponeProvider } from './context/PostponeContext'
 
 const PAGES = {
     dashboard: Dashboard,
@@ -26,6 +28,7 @@ const PAGES = {
     flashcards: Flashcards,
     tasks: Tasks,
     pomodoro: Pomodoro,
+    postpone: Postpone,
     calendar: Calendar,
     habits: Habits,
     stats: Stats,
@@ -109,9 +112,10 @@ export default function Panel({ user, onExit, updateUser }) {
     }
 
     return (
-        <WidgetProvider>
+        <PostponeProvider>
             <AudioPlayerProvider>
-                <div className={`panel-root ${isMobile ? 'is-mobile' : 'is-desktop'} ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+                <WidgetProvider>
+                    <div className={`panel-root ${isMobile ? 'is-mobile' : 'is-desktop'} ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
 
                     {/* Botón flotante para móvil */}
                     {isMobile && (
@@ -161,8 +165,9 @@ export default function Panel({ user, onExit, updateUser }) {
                     }
                 }
             `}</style>
-                </div>
+                    </div>
+                </WidgetProvider>
             </AudioPlayerProvider>
-        </WidgetProvider>
+        </PostponeProvider>
     )
 }
