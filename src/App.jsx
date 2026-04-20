@@ -118,7 +118,7 @@ function IntroScreen({ onDone }) {
       <div className="intro-wave-glass wave-secondary" ref={wave2} />
       
       <div className="intro-content-gsap">
-        <img src="dist/icon.png" alt="StudyNeo" className="intro-logo-img-gsap" ref={logo} />
+        <img src="./icon.svg" alt="StudyNeo" className="intro-logo-img-gsap" ref={logo} />
         <div className="intro-logo-text-gsap" ref={text}>StudyNeo</div>
         <div className="intro-progress-bar-gsap" ref={bar}>
           <div className="intro-progress-fill-gsap" ref={barFill} />
@@ -606,7 +606,7 @@ export default function App() {
         {!isZen && (
           <header className={`topbar ${scrolled ? 'scrolled' : ''}`}>
             <div className="topbar-logo enter-logo">
-              <img src="dist/icon.png" alt="StudyNeo" className="topbar-logo-img" />
+              <img src="./icon.svg" alt="StudyNeo" className="topbar-logo-img" />
               StudyNeo
             </div>
 
