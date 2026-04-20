@@ -1,10 +1,10 @@
 const CACHE_NAME = 'studyneo-cache-v1';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/sw.js',
-  '/dist/icon.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './sw.js',
+  './icon.svg'
 ];
 
 // Instalar y cachear recursos estáticos nucleares

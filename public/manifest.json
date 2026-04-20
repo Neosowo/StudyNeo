@@ -2,13 +2,13 @@
   "name": "Postpone",
   "short_name": "Postpone",
   "description": "Temporizador Pomodoro y lista de tareas para sesiones de estudio productivas.",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#A89BF2",
   "orientation": "any",
   "categories": ["education", "productivity"],
   "icons": [
-    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }
