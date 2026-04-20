@@ -11,8 +11,11 @@ const ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS).catch(err => {
-        console.warn('Algunos assets no se pudieron cachear en la instalación:', err);
+      // Usamos .map para que si un archivo falla, el resto se guarde igual
+      return Promise.allSettled(
+        ASSETS.map(asset => cache.add(asset))
+      ).then(() => {
+        console.log('Cacheo inicial completado (con control de errores)');
       });
     })
   );
