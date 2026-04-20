@@ -1,53 +1,48 @@
-const CACHE_NAME = 'postpone-v3';
-const OFFLINE_URL = '/index.html';
-
+const CACHE_NAME = 'studyneo-cache-v1';
 const ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/sw.js'
+  '/sw.js',
+  '/dist/icon.png'
 ];
 
+// Instalar y cachear recursos estáticos nucleares
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
+      return cache.addAll(ASSETS).catch(err => {
+        console.warn('Algunos assets no se pudieron cachear en la instalación:', err);
+      });
     })
   );
   self.skipWaiting();
 });
 
+// Limpiar caches antiguos
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then((keys) => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
+        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
       );
     })
   );
   self.clients.claim();
 });
 
+// Estrategia: Stale-While-Revalidate para mayor velocidad y resiliencia
 self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          return cache.match(OFFLINE_URL);
-        });
-      })
-    );
+  // Ignorar peticiones de Firebase u otras apis externas
+  if (!event.request.url.startsWith(self.location.origin)) {
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic' && event.request.method === 'GET') {
+    caches.match(event.request).then((cachedResponse) => {
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
+        // Solo cachear peticiones exitosas GET
+        if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
@@ -55,8 +50,13 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       }).catch(() => {
-        // Fallback for non-cached network requests
+        // Si hay fallo de red y es una navegación, devolver index.html
+        if (event.request.mode === 'navigate') {
+          return caches.match('/index.html');
+        }
       });
+
+      return cachedResponse || fetchPromise;
     })
   );
 });
