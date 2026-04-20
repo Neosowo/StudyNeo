@@ -4,7 +4,7 @@ const ASSETS = [
   './index.html',
   './manifest.json',
   './sw.js',
-  './icon.svg'
+  './icon.png'
 ];
 
 // Instalar y cachear recursos estáticos nucleares

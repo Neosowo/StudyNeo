@@ -9,6 +9,6 @@
   "orientation": "any",
   "categories": ["education", "productivity"],
   "icons": [
-    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "./icon.png", "sizes": "any", "type": "image/png", "purpose": "any maskable" }
   ]
 }

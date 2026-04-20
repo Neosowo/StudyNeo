@@ -62,7 +62,7 @@ function ForoApp() {
       {/* Topbar minimalist and perfectly aligned */}
       <header className="topbar scrolled" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>
         <a href="/" className="topbar-logo enter-logo" style={{ textDecoration: 'none' }}>
-          <img src="./icon.svg" alt="StudyNeo" className="topbar-logo-img" />
+          <img src="./icon.png" alt="StudyNeo" className="topbar-logo-img" />
           StudyNeo
         </a>
 
@@ -80,7 +80,7 @@ function ForoApp() {
 
       <footer className="app-footer">
         <div className="footer-links">
-          <a href="/donar.html" className="footer-link donate-link">
+          <a href="./donar.html" className="footer-link donate-link">
             <Sparkles size={14} /> Donar
           </a>
 
@@ -98,10 +98,10 @@ function ForoApp() {
             
             {footerMenuOpen && (
               <div className="footer-popover animate-scale">
-                <a href="/privacidad.html" className="footer-popover-item">
+                <a href="./privacidad.html" className="footer-popover-item">
                   <Shield size={12} /> Privacidad
                 </a>
-                <a href="/terminos.html" className="footer-popover-item">
+                <a href="./terminos.html" className="footer-popover-item">
                   <ScrollText size={12} /> Términos
                 </a>
               </div>

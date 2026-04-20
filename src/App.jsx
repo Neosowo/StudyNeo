@@ -118,7 +118,7 @@ function IntroScreen({ onDone }) {
       <div className="intro-wave-glass wave-secondary" ref={wave2} />
       
       <div className="intro-content-gsap">
-        <img src="./icon.svg" alt="StudyNeo" className="intro-logo-img-gsap" ref={logo} />
+        <img src="./icon.png" alt="StudyNeo" className="intro-logo-img-gsap" ref={logo} />
         <div className="intro-logo-text-gsap" ref={text}>StudyNeo</div>
         <div className="intro-progress-bar-gsap" ref={bar}>
           <div className="intro-progress-fill-gsap" ref={barFill} />
@@ -606,7 +606,7 @@ export default function App() {
         {!isZen && (
           <header className={`topbar ${scrolled ? 'scrolled' : ''}`}>
             <div className="topbar-logo enter-logo">
-              <img src="./icon.svg" alt="StudyNeo" className="topbar-logo-img" />
+              <img src="./icon.png" alt="StudyNeo" className="topbar-logo-img" />
               StudyNeo
             </div>
 
@@ -651,11 +651,11 @@ export default function App() {
             <div className="footer-links">
               <LikeButton />
 
-              <a href="/donar.html" className="footer-link donate-link">
+              <a href="./donar.html" className="footer-link donate-link">
                 <Sparkles size={14} /> Donar
               </a>
 
-              <a href="/foro.html" className="footer-link">
+              <a href="./foro.html" className="footer-link">
                 <MessageSquare size={14} /> Sugerencias
               </a>
 
@@ -673,10 +673,10 @@ export default function App() {
                 
                 {footerMenuOpen && (
                   <div className="footer-popover animate-scale">
-                    <a href="/privacidad.html" className="footer-popover-item">
+                    <a href="./privacidad.html" className="footer-popover-item">
                       <Shield size={12} /> Privacidad
                     </a>
-                    <a href="/terminos.html" className="footer-popover-item">
+                    <a href="./terminos.html" className="footer-popover-item">
                       <ScrollText size={12} /> Términos
                     </a>
                   </div>

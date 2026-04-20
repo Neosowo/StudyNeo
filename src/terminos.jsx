@@ -20,7 +20,7 @@ function TerminosApp() {
 
       <header className="topbar scrolled" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>
         <a href="/" className="topbar-logo enter-logo" style={{ textDecoration: 'none' }}>
-          <img src="/./icon.svg" alt="StudyNeo" className="topbar-logo-img" />
+          <img src="/./icon.png" alt="StudyNeo" className="topbar-logo-img" />
           StudyNeo
         </a>
 
