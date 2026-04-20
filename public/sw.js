@@ -55,7 +55,7 @@ self.addEventListener('fetch', (event) => {
       }).catch(() => {
         // Si hay fallo de red y es una navegación, devolver index.html
         if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
+          return caches.match('./index.html');
         }
       });
 

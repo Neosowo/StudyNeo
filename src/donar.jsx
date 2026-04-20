@@ -87,7 +87,15 @@ function DonationLink({ href, onClick, icon: Icon, title, subtitle, color, bgCol
 }
 
 /* ── Main App ─────────────────────────────────────────────── */
+const isLowEndDevice = () => {
+  if (typeof navigator === 'undefined') return false;
+  const memory = navigator.deviceMemory || 4;
+  const cores = navigator.hardwareConcurrency || 4;
+  return memory <= 2 || cores <= 2;
+};
+
 function DonarApp() {
+  const [isLowEnd] = useState(isLowEndDevice)
   const theme = storage.get(KEYS.THEME, 'dark')
   const [qrInfo, setQrInfo] = useState(null)
 
@@ -96,20 +104,25 @@ function DonarApp() {
   }, [theme])
 
   return (
-    <div className={`app-layout ${theme === 'dark' ? '' : 'is-light'}`} style={{ minHeight: '100vh' }}>
-      <div className="noise-overlay" />
-      <div className="ambient-orb ambient-orb-1" />
-      <div className="ambient-orb ambient-orb-2" />
-      <div className="ambient-orb ambient-orb-3" />
+    <div className={`app-layout ${theme === 'dark' ? '' : 'is-light'} ${isLowEnd ? 'is-low-end' : ''}`} style={{ minHeight: '100vh' }}>
+      {!isLowEnd && (
+        <>
+          <div className="noise-overlay" />
+          <div className="ambient-orb ambient-orb-1" />
+          <div className="ambient-orb ambient-orb-2" />
+          <div className="ambient-orb ambient-orb-3" />
+        </>
+      )}
+      {isLowEnd && <div className="static-ambient-bg" />}
 
       {/* Navbar — same as all other pages */}
       <header className="topbar scrolled" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>
-        <a href="/" className="topbar-logo enter-logo" style={{ textDecoration: 'none' }}>
-          <img src="./icon.png" alt="StudyNeo" className="topbar-logo-img" />
+        <a href={import.meta.env.BASE_URL} className="topbar-logo enter-logo" style={{ textDecoration: 'none' }}>
+          <img src={`${import.meta.env.BASE_URL}icon.png`} alt="StudyNeo" className="topbar-logo-img" />
           StudyNeo
         </a>
         <div className="topbar-actions enter-nav">
-          <a href="/" className="topbar-btn" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px' }}>
+          <a href={import.meta.env.BASE_URL} className="topbar-btn" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px' }}>
             <ArrowLeft size={14} /> <span>Volver</span>
           </a>
         </div>
@@ -131,7 +144,7 @@ function DonarApp() {
           <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <DonationLink
               onClick={() => setQrInfo({
-                img: 'dist/qr-paypal.jpeg', text: 'PayPal · @neosowo',
+                img: `${import.meta.env.BASE_URL}qr-paypal.jpeg`, text: 'PayPal · @neosowo',
                 url: 'https://paypal.me/neosowo', label: 'Abrir PayPal.me', color: '#003087'
               })}
               icon={CreditCard}
@@ -151,7 +164,7 @@ function DonarApp() {
             />
             <DonationLink
               onClick={() => setQrInfo({
-                img: 'dist/qr.png', text: 'Deuna! Ecuador',
+                img: `${import.meta.env.BASE_URL}qr.png`, text: 'Deuna! Ecuador',
                 url: null, label: null, color: '#00BFA5'
               })}
               icon={Globe}

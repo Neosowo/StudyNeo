@@ -4,7 +4,15 @@ import { ArrowLeft, ScrollText } from 'lucide-react'
 import './index.css'
 import { storage, KEYS } from './utils/storage'
 
+const isLowEndDevice = () => {
+  if (typeof navigator === 'undefined') return false;
+  const memory = navigator.deviceMemory || 4;
+  const cores = navigator.hardwareConcurrency || 4;
+  return memory <= 2 || cores <= 2;
+};
+
 function TerminosApp() {
+  const isLowEnd = isLowEndDevice()
   const theme = storage.get(KEYS.THEME, 'dark')
 
   useEffect(() => {
@@ -12,20 +20,25 @@ function TerminosApp() {
   }, [theme])
 
   return (
-    <div className={`app-container mode-zen ${theme === 'dark' ? '' : 'is-light'}`} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <div className="noise-overlay" />
-      <div className="ambient-orb ambient-orb-1" />
-      <div className="ambient-orb ambient-orb-2" />
-      <div className="ambient-orb ambient-orb-3" />
+    <div className={`app-container mode-zen ${theme === 'dark' ? '' : 'is-light'} ${isLowEnd ? 'is-low-end' : ''}`} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {!isLowEnd && (
+        <>
+          <div className="noise-overlay" />
+          <div className="ambient-orb ambient-orb-1" />
+          <div className="ambient-orb ambient-orb-2" />
+          <div className="ambient-orb ambient-orb-3" />
+        </>
+      )}
+      {isLowEnd && <div className="static-ambient-bg" />}
 
       <header className="topbar scrolled" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>
-        <a href="/" className="topbar-logo enter-logo" style={{ textDecoration: 'none' }}>
-          <img src="/./icon.png" alt="StudyNeo" className="topbar-logo-img" />
+        <a href={import.meta.env.BASE_URL} className="topbar-logo enter-logo" style={{ textDecoration: 'none' }}>
+          <img src={`${import.meta.env.BASE_URL}icon.png`} alt="StudyNeo" className="topbar-logo-img" />
           StudyNeo
         </a>
 
         <div className="topbar-actions enter-nav">
-          <a href="/" className="topbar-btn" style={{ textDecoration: 'none', padding: '0 12px', gap: '8px' }}>
+          <a href={import.meta.env.BASE_URL} className="topbar-btn" style={{ textDecoration: 'none', padding: '0 12px', gap: '8px' }}>
             <ArrowLeft size={14} /> <span className="topbar-btn-label">Volver</span>
           </a>
         </div>

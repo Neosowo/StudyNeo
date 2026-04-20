@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom/client'
-import { ArrowLeft, Shield, ScrollText, MoreHorizontal, Sparkles, Github } from 'lucide-react'
+import { ArrowLeft, Shield, ScrollText, MoreHorizontal, Sparkles, Github, Mail, Copy, CheckCircle2, AlertTriangle, Info } from 'lucide-react'
 import FeedbackForum from './components/FeedbackForum'
 import './index.css'
 import { storage, KEYS } from './utils/storage'
@@ -8,6 +8,7 @@ import { db, ref, onValue, push, set, onDisconnect } from './utils/firebase'
 
 /* ══════════════════════════════════════════════════════════ */
 /* ONLINE USERS MATCHING (Presence)                             */
+/* ══════════════════════════════════════════════════════════ */
 /* ══════════════════════════════════════════════════════════ */
 function OnlineUsers() {
   const [online, setOnline] = useState(1);
@@ -35,7 +36,39 @@ function OnlineUsers() {
   )
 }
 
+/* ══════════════════════════════════════════════════════════ */
+/* TOAST SYSTEM                                               */
+/* ══════════════════════════════════════════════════════════ */
+function Toast({ toasts, onRemove }) {
+  const icons = {
+    success: <CheckCircle2 size={16} />,
+    error: <AlertTriangle size={16} />,
+    info: <Info size={16} />,
+  }
+  return (
+    <div className="toast-container">
+      {toasts.map(t => (
+        <div key={t.id} className={`toast ${t.type}`} onClick={() => onRemove(t.id)}>
+          <div className="toast-icon">{icons[t.type] || icons.info}</div>
+          <span>{t.message}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+let toastId = 0
+
+const isLowEndDevice = () => {
+  if (typeof navigator === 'undefined') return false;
+  const memory = navigator.deviceMemory || 4;
+  const cores = navigator.hardwareConcurrency || 4;
+  return memory <= 2 || cores <= 2;
+};
+
 function ForoApp() {
+  const [isLowEnd] = useState(isLowEndDevice)
+  const [toasts, setToasts] = useState([])
   const theme = storage.get(KEYS.THEME, 'dark')
   const [footerMenuOpen, setFooterMenuOpen] = useState(false)
   const footerMenuRef = useRef(null)
@@ -51,36 +84,64 @@ function ForoApp() {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
 
+  const addToast = (msg, type = 'info') => {
+    const id = ++toastId
+    setToasts(t => [...t, { id, message: msg, type }])
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3500)
+  }
+  const removeToast = id => setToasts(t => t.filter(x => x.id !== id))
+
+  const copyEmail = (e) => {
+    const email = "studyneo.sup@gmail.com"
+    // Intentar abrir el mailto de todas formas
+    window.location.href = `mailto:${email}`
+    
+    // Y copiar al portapapeles por si el mailto falla
+    navigator.clipboard.writeText(email).then(() => {
+      addToast('Correo copiado al portapapeles', 'success')
+    }).catch(() => {
+      addToast('Correo: studyneo.sup@gmail.com', 'info')
+    })
+  }
+
   return (
-    <div className={`app-container mode-zen ${theme === 'dark' ? '' : 'is-light'}`} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className={`app-container mode-zen ${theme === 'dark' ? '' : 'is-light'} ${isLowEnd ? 'is-low-end' : ''}`} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Background orbs */}
-      <div className="noise-overlay" />
-      <div className="ambient-orb ambient-orb-1" />
-      <div className="ambient-orb ambient-orb-2" />
-      <div className="ambient-orb ambient-orb-3" />
+      {!isLowEnd && (
+        <>
+          <div className="noise-overlay" />
+          <div className="ambient-orb ambient-orb-1" />
+          <div className="ambient-orb ambient-orb-2" />
+          <div className="ambient-orb ambient-orb-3" />
+        </>
+      )}
+      {isLowEnd && <div className="static-ambient-bg" />}
 
       {/* Topbar minimalist and perfectly aligned */}
       <header className="topbar scrolled" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>
-        <a href="/" className="topbar-logo enter-logo" style={{ textDecoration: 'none' }}>
-          <img src="./icon.png" alt="StudyNeo" className="topbar-logo-img" />
+        <a href={import.meta.env.BASE_URL} className="topbar-logo enter-logo" style={{ textDecoration: 'none' }}>
+          <img src={`${import.meta.env.BASE_URL}icon.png`} alt="StudyNeo" className="topbar-logo-img" />
           StudyNeo
         </a>
 
         <div className="topbar-actions enter-nav">
           <OnlineUsers />
-          <a href="/" className="topbar-btn" style={{ textDecoration: 'none', padding: '0 12px', gap: '8px' }}>
+          <button onClick={copyEmail} className="topbar-btn" title="Copiar correo de contacto">
+            <Mail size={14} /> <span className="topbar-btn-label">Contacto</span>
+          </button>
+          <a href={import.meta.env.BASE_URL} className="topbar-btn" style={{ textDecoration: 'none', padding: '0 12px', gap: '8px' }}>
             <ArrowLeft size={14} /> <span className="topbar-btn-label">Volver al Reloj</span>
           </a>
         </div>
       </header>
       
       <main style={{ flex: 1, padding: '20px 0' }}>
-        <FeedbackForum onBack={() => window.location.href = '/'} lang={storage.get(KEYS.SETTINGS, {}).lang || 'es'} />
+        <FeedbackForum onBack={() => window.location.href = import.meta.env.BASE_URL} lang={storage.get(KEYS.SETTINGS, {}).lang || 'es'} />
       </main>
 
       <footer className="app-footer">
         <div className="footer-links">
-          <a href="./donar.html" className="footer-link donate-link">
+          <a href={`${import.meta.env.BASE_URL}donar.html`} className="footer-link donate-link">
             <Sparkles size={14} /> Donar
           </a>
 
@@ -98,10 +159,13 @@ function ForoApp() {
             
             {footerMenuOpen && (
               <div className="footer-popover animate-scale">
-                <a href="./privacidad.html" className="footer-popover-item">
+                <button onClick={copyEmail} className="footer-popover-item" style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}>
+                  <Mail size={12} /> Contacto
+                </button>
+                <a href={`${import.meta.env.BASE_URL}privacidad.html`} className="footer-popover-item">
                   <Shield size={12} /> Privacidad
                 </a>
-                <a href="./terminos.html" className="footer-popover-item">
+                <a href={`${import.meta.env.BASE_URL}terminos.html`} className="footer-popover-item">
                   <ScrollText size={12} /> Términos
                 </a>
               </div>
@@ -110,6 +174,8 @@ function ForoApp() {
         </div>
         <p className="footer-credits">StudyNeo © {new Date().getFullYear()}</p>
       </footer>
+
+      <Toast toasts={toasts} onRemove={removeToast} />
     </div>
   )
 }

@@ -17,7 +17,7 @@ import { setMuted } from './utils/sounds'
 /* ── Service Worker (ACTIVADO) ──────────── */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('./sw.js')
       .then(reg => {
         // console.log('SW registrado:', reg)
       })
@@ -458,7 +458,16 @@ function LocalClock() {
 let toastId = 0
 const DEFAULT_SETTINGS = { pomodoro: 25, short: 5, long: 15, longBreakInterval: 4, autoStart: false, lang: 'es', showTodos: true, showCards: true, showCalc: true, showNotes: true, showLofi: true, ultraFocus: false, muteSounds: false }
 
+// Detección simple de hardware de bajo rendimiento
+const isLowEndDevice = () => {
+  if (typeof navigator === 'undefined') return false;
+  const memory = navigator.deviceMemory || 4;
+  const cores = navigator.hardwareConcurrency || 4;
+  return memory <= 2 || cores <= 2;
+};
+
 export default function App() {
+  const [isLowEnd]      = useState(isLowEndDevice)
   const [showIntro,     setShowIntro]     = useState(() => {
     // Check if intro was already played in this session to skip on refresh (F5)
     return !sessionStorage.getItem('postpone_intro_played')
@@ -579,18 +588,23 @@ export default function App() {
   }
 
   return (
-    <div className={`app-container ${isZen ? 'mode-zen' : ''} ${isIdle ? 'is-idle' : ''}`}>
+    <div className={`app-container ${isZen ? 'mode-zen' : ''} ${isIdle ? 'is-idle' : ''} ${isLowEnd ? 'is-low-end' : ''}`}>
       {/* Intro animation */}
       {showIntro && <IntroScreen onDone={() => {
         setShowIntro(false)
         sessionStorage.setItem('postpone_intro_played', 'true')
       }} />}
 
-      {/* Background orbs */}
-      <div className="noise-overlay" />
-      <div className="ambient-orb ambient-orb-1" />
-      <div className="ambient-orb ambient-orb-2" />
-      <div className="ambient-orb ambient-orb-3" />
+      {/* Background orbs — Simplified or removed on low-end */}
+      {!isLowEnd && (
+        <>
+          <div className="noise-overlay" />
+          <div className="ambient-orb ambient-orb-1" />
+          <div className="ambient-orb ambient-orb-2" />
+          <div className="ambient-orb ambient-orb-3" />
+        </>
+      )}
+      {isLowEnd && <div className="static-ambient-bg" />}
 
       {isZen && (
         <button className="zen-exit-btn" onClick={() => handleSaveSettings({ ...timerSettings, ultraFocus: false })} title="Salir del Modo Zen">
@@ -651,11 +665,11 @@ export default function App() {
             <div className="footer-links">
               <LikeButton />
 
-              <a href="./donar.html" className="footer-link donate-link">
+              <a href={`${import.meta.env.BASE_URL}donar.html`} className="footer-link donate-link">
                 <Sparkles size={14} /> Donar
               </a>
 
-              <a href="./foro.html" className="footer-link">
+              <a href={`${import.meta.env.BASE_URL}foro.html`} className="footer-link">
                 <MessageSquare size={14} /> Sugerencias
               </a>
 
@@ -673,10 +687,10 @@ export default function App() {
                 
                 {footerMenuOpen && (
                   <div className="footer-popover animate-scale">
-                    <a href="./privacidad.html" className="footer-popover-item">
+                    <a href={`${import.meta.env.BASE_URL}privacidad.html`} className="footer-popover-item">
                       <Shield size={12} /> Privacidad
                     </a>
-                    <a href="./terminos.html" className="footer-popover-item">
+                    <a href={`${import.meta.env.BASE_URL}terminos.html`} className="footer-popover-item">
                       <ScrollText size={12} /> Términos
                     </a>
                   </div>
