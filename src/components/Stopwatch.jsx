@@ -243,12 +243,16 @@ export default function Stopwatch({ isZen }) {
       {/* ── WORKING State ── */}
       {state === STATES.WORKING && (
         <div className="sw-state-panel sw-working animate-fade">
-          <div className="sw-state-badge sw-badge-working">
-            <div className="sw-badge-dot working" /> Trabajando
-          </div>
+          {!isZen && (
+            <div className="sw-state-badge sw-badge-working">
+              <div className="sw-badge-dot working" /> Trabajando
+            </div>
+          )}
           <div className="study-clock-wrap">
             <div className="study-clock">{fmt(blockElapsed)}</div>
-            <div className="study-clock-label">Bloque actual de foco</div>
+            {!isZen && (
+              <div className="study-clock-label">Bloque actual de foco</div>
+            )}
           </div>
 
           {!isZen && (
@@ -258,36 +262,44 @@ export default function Stopwatch({ isZen }) {
             </div>
           )}
 
-          <div className="sw-actions">
-            <button className="sw-btn sw-btn-focus" onClick={handleLostFocus}>
-              <XCircle size={18} /> Perdí el foco
-            </button>
-            <button className="sw-btn sw-btn-end" onClick={handleEnd}>
-              <Square size={16} /> Terminar sesión
-            </button>
-          </div>
+          {!isZen && (
+            <div className="sw-actions">
+              <button className="sw-btn sw-btn-focus" onClick={handleLostFocus}>
+                <XCircle size={18} /> Perdí el foco
+              </button>
+              <button className="sw-btn sw-btn-end" onClick={handleEnd}>
+                <Square size={16} /> Terminar sesión
+              </button>
+            </div>
+          )}
         </div>
       )}
 
       {/* ── DISTRACTED State ── */}
       {state === STATES.DISTRACTED && (
         <div className="sw-state-panel sw-distracted animate-fade">
-          <div className="sw-state-badge sw-badge-distracted">
-            <div className="sw-badge-dot distracted" /> Sin foco
-          </div>
+          {!isZen && (
+            <div className="sw-state-badge sw-badge-distracted">
+              <div className="sw-badge-dot distracted" /> Sin foco
+            </div>
+          )}
           <div className="study-clock-wrap">
             <div className="study-clock sw-clock-red">{fmt(blockElapsed)}</div>
-            <div className="study-clock-label sw-label-red">{distractMsg}</div>
+            {!isZen && (
+              <div className="study-clock-label sw-label-red">{distractMsg}</div>
+            )}
           </div>
 
-          <div className="sw-actions">
-            <button className="sw-btn sw-btn-resume" onClick={handleResume}>
-              <ArrowRight size={18} /> Volver al trabajo
-            </button>
-            <button className="sw-btn sw-btn-end" onClick={handleEnd}>
-              <Square size={16} /> Terminar sesión
-            </button>
-          </div>
+          {!isZen && (
+            <div className="sw-actions">
+              <button className="sw-btn sw-btn-resume" onClick={handleResume}>
+                <ArrowRight size={18} /> Volver al trabajo
+              </button>
+              <button className="sw-btn sw-btn-end" onClick={handleEnd}>
+                <Square size={16} /> Terminar sesión
+              </button>
+            </div>
+          )}
         </div>
       )}
 

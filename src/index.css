@@ -3492,6 +3492,17 @@ button:active { transform: scale(0.96); }
 /* ZEN MODE IDLE FADE & CLOCK SCALE                            */
 /* ═══════════════════════════════════════════════════════════ */
 
+/* Hide stopwatch-specific UI in zen mode at CSS level (bulletproof fallback) */
+.mode-zen .sw-state-badge,
+.mode-zen .sw-actions,
+.mode-zen .sw-mini-stats,
+.mode-zen .sw-stats-grid,
+.mode-zen .sw-efficiency-bar-wrap,
+.mode-zen .sw-history,
+.mode-zen .study-clock-label {
+  display: none !important;
+}
+
 /* Fade all menus & controls out when idle. When NOT idle, they fade in. */
 .mode-zen .zen-exit-btn,
 .mode-zen .timer-modes,
@@ -3499,7 +3510,6 @@ button:active { transform: scale(0.96); }
 .mode-zen .timer-link-wrap,
 .mode-zen .timer-controls,
 .mode-zen .study-controls,
-.mode-zen .study-clock-label,
 .mode-zen .session-count {
   transition: opacity 0.5s ease-out !important;
   opacity: 1 !important;
@@ -3511,7 +3521,6 @@ button:active { transform: scale(0.96); }
 .mode-zen.is-idle .timer-link-wrap,
 .mode-zen.is-idle .timer-controls,
 .mode-zen.is-idle .study-controls,
-.mode-zen.is-idle .study-clock-label,
 .mode-zen.is-idle .session-count {
   opacity: 0 !important;
   pointer-events: none !important;
