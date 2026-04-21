@@ -3854,3 +3854,504 @@ button:active { transform: scale(0.96); }
   0%, 100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
   50% { box-shadow: 0 0 0 8px rgba(248, 113, 113, 0.12); }
 }
+
+/* ═══════════════════════════════════════════════════════════ */
+/* COMPREHENSIVE RESPONSIVE DESIGN SYSTEM                      */
+/* Uses .is-mobile / .is-tablet / .is-desktop device classes   */
+/* injected by useDevice.js hook + media queries as backup     */
+/* ═══════════════════════════════════════════════════════════ */
+
+/* ── Touch target optimization (all devices with touch) ───── */
+.is-touch button,
+.is-touch .mode-tab,
+.is-touch .phase-tab,
+.is-touch .filter-btn,
+.is-touch .tab-menu-item,
+.is-touch .footer-link,
+.is-touch .topbar-btn {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* ── Small phones (< 360px width) ──────────────────────────── */
+.is-small-phone {
+  font-size: 14px;
+}
+
+.is-small-phone .topbar {
+  padding: 0 0.75rem;
+  height: 54px;
+}
+
+.is-small-phone .topbar-logo {
+  font-size: 0.9rem;
+  gap: 6px;
+}
+
+.is-small-phone .topbar-logo-img {
+  width: 26px;
+  height: 26px;
+}
+
+.is-small-phone .topbar-btn {
+  height: 30px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+
+.is-small-phone .topbar-btn-label {
+  display: none !important;
+}
+
+.is-small-phone .main-content {
+  padding: 3.5rem 0.75rem 1rem !important;
+  gap: 1rem !important;
+}
+
+.is-small-phone :root {
+  --ring-size: 200px;
+}
+
+.is-small-phone .study-clock {
+  font-size: 5rem !important;
+}
+
+.is-small-phone .timer-card {
+  padding: 1.25rem 0.875rem;
+}
+
+.is-small-phone .ctrl-btn-primary {
+  width: 58px;
+  height: 58px;
+}
+
+.is-small-phone .ctrl-btn-secondary {
+  width: 38px;
+  height: 38px;
+}
+
+.is-small-phone .todo-card {
+  border-radius: 16px;
+}
+
+.is-small-phone .mode-tab {
+  padding: 5px 10px;
+  font-size: 11px;
+}
+
+.is-small-phone .settings-panel {
+  border-radius: 16px;
+  max-height: 95vh;
+}
+
+/* ── Mobile (< 768px) ──────────────────────────────────────── */
+.is-mobile .topbar {
+  padding: 0 1rem;
+  height: 58px;
+}
+
+.is-mobile .topbar-btn-label {
+  display: none !important;
+}
+
+.is-mobile .topbar-btn {
+  height: 36px;
+  width: 36px;
+  padding: 0;
+  border-radius: 10px;
+}
+
+/* On mobile, stack main layout vertically */
+.is-mobile .main-content {
+  grid-template-columns: 1fr !important;
+  padding: 4rem 1rem 2rem !important;
+  gap: 1.25rem !important;
+  max-width: 100% !important;
+}
+
+.is-mobile .timer-section {
+  gap: 1.25rem;
+}
+
+/* Timer modes — wrap on small screens */
+.is-mobile .timer-modes {
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.is-mobile .mode-tab {
+  padding: 7px 14px;
+  font-size: 12px;
+}
+
+/* Ring — smaller on mobile */
+.is-mobile {
+  --ring-size: 240px;
+}
+
+.is-mobile .study-clock {
+  font-size: 6rem !important;
+}
+
+/* Controls — comfortable touch targets */
+.is-mobile .ctrl-btn-primary {
+  width: 68px;
+  height: 68px;
+}
+
+.is-mobile .ctrl-btn-secondary {
+  width: 48px;
+  height: 48px;
+}
+
+.is-mobile .timer-controls {
+  gap: 1.25rem;
+}
+
+/* Links/timer task link — full width on mobile */
+.is-mobile .timer-link-dropdown {
+  width: calc(100vw - 2rem);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Todo card — remove horizontal padding on tiny screens */
+.is-mobile .todo-header {
+  padding: 1.1rem 1.25rem;
+}
+
+.is-mobile .todo-add-wrap {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.is-mobile .todo-item {
+  padding: 11px 1.25rem;
+}
+
+.is-mobile .todo-list {
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.is-mobile .todo-filters {
+  padding: 0.75rem 1.25rem;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.is-mobile .todo-footer {
+  padding: 1rem 1.25rem;
+}
+
+/* Notes panel — full screen feel on mobile */
+.is-mobile .notes-panel {
+  max-width: 100%;
+  border-radius: 20px;
+}
+
+.is-mobile .notes-textarea {
+  min-height: 300px;
+  font-size: 16px; /* prevents iOS zoom */
+}
+
+/* Settings — full width on mobile */
+.is-mobile .settings-panel {
+  max-width: 100%;
+  border-radius: 20px;
+  max-height: 92vh;
+}
+
+.is-mobile .settings-overlay {
+  padding: 1rem 0.75rem;
+  align-items: flex-end;
+}
+
+/* Date picker — center on mobile */
+.is-mobile .date-picker-panel {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  width: auto;
+  top: auto;
+  border-radius: 20px;
+  z-index: 3000;
+}
+
+/* Footer — compact on mobile */
+.is-mobile .app-footer {
+  padding: 1.5rem 1rem;
+}
+
+.is-mobile .footer-links {
+  gap: 0.75rem;
+}
+
+.is-mobile .footer-link {
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+/* Context menu — left-anchor on mobile to prevent overflow */
+.is-mobile .todo-context-menu {
+  right: auto;
+  left: 0;
+}
+
+/* Todo input — prevent iOS zoom (font-size >= 16px) */
+.is-mobile .todo-add-input,
+.is-mobile .fc-input,
+.is-mobile .espol-input,
+.is-mobile .notes-textarea,
+.is-mobile .notes-title-input,
+.is-mobile .notes-search-input,
+.is-mobile input[type="text"],
+.is-mobile input[type="number"],
+.is-mobile textarea {
+  font-size: 16px !important;
+}
+
+/* Stopwatch time — bigger, bolder */
+.is-mobile .sw-time {
+  font-size: 4rem;
+}
+
+/* Stats grid — single column on very small mobile */
+.is-mobile .sw-stats-grid {
+  grid-template-columns: 1fr 1fr;
+  max-width: 100%;
+}
+
+/* Flashcard — taller on mobile for readability */
+.is-mobile .fc-card {
+  min-height: 180px;
+}
+
+/* Pop-menu above footer — handle viewport edge */
+.is-mobile .footer-popover {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+/* Phase tabs — scrollable row on mobile */
+.is-mobile .timer-phases {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+  width: 100%;
+  justify-content: flex-start;
+  padding-left: 8px;
+}
+
+.is-mobile .timer-phases::-webkit-scrollbar {
+  display: none;
+}
+
+/* Nav settings panel — full width on mobile */
+.is-mobile .nav-settings-panel {
+  width: calc(100vw - 2rem);
+  right: -0.5rem;
+}
+
+/* Zen exit button — smaller on mobile */
+.is-mobile .zen-exit-btn {
+  top: 0.75rem;
+  right: 1rem;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* ESPOL form — full rows on mobile */
+.is-mobile .espol-prac-row {
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Notes grid — single column on mobile */
+.is-mobile .notes-grid {
+  grid-template-columns: 1fr;
+}
+
+/* ── Landscape mobile — special cases ──────────────────────── */
+.is-mobile.orient-landscape .main-content {
+  padding-top: 3.5rem !important;
+}
+
+.is-mobile.orient-landscape .study-clock {
+  font-size: 4.5rem !important;
+}
+
+.is-mobile.orient-landscape .timer-ring-area {
+  padding: 1.5rem 0;
+}
+
+/* ── Tablet (768px – 1023px) ───────────────────────────────── */
+.is-tablet .main-content {
+  grid-template-columns: 1fr !important;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 2rem !important;
+}
+
+.is-tablet .topbar-btn-label {
+  display: inline !important;
+}
+
+.is-tablet {
+  --ring-size: 260px;
+}
+
+.is-tablet .study-clock {
+  font-size: 7rem !important;
+}
+
+.is-tablet .todo-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.is-tablet .notes-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.is-tablet .timer-modes {
+  flex-wrap: nowrap;
+}
+
+/* ── Desktop (≥ 1024px) ────────────────────────────────────── */
+.is-desktop .main-content {
+  grid-template-columns: 1fr 440px;
+  gap: 2rem;
+  padding: 5.5rem 2rem 2rem !important;
+  max-width: 1400px;
+}
+
+.is-desktop .todo-list {
+  max-height: none;
+  overflow-y: visible;
+}
+
+/* Large desktop */
+@media (min-width: 1280px) {
+  .is-desktop .main-content {
+    grid-template-columns: 1fr 480px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .is-desktop .main-content {
+    grid-template-columns: 1fr 520px;
+    max-width: 1600px;
+  }
+}
+
+/* ── Pure CSS fallback media queries (no JS classes) ──────── */
+
+/* Tiny phones */
+@media screen and (max-width: 359px) {
+  :root { --ring-size: 195px; }
+  .topbar { padding: 0 0.75rem; height: 54px; }
+  .main-content { padding: 3.5rem 0.75rem 1rem !important; }
+  .study-clock { font-size: 5rem !important; }
+  .ctrl-btn-primary { width: 58px; height: 58px; }
+  .ctrl-btn-secondary { width: 38px; height: 38px; }
+  .timer-modes { flex-wrap: wrap; }
+  .mode-tab { font-size: 11px; padding: 5px 10px; }
+  .topbar-btn-label { display: none !important; }
+  input, textarea, select { font-size: 16px !important; }
+}
+
+/* Standard mobile */
+@media screen and (max-width: 767px) {
+  :root { --ring-size: 235px; }
+  .topbar-btn-label { display: none !important; }
+  .topbar-btn { height: 36px; width: 36px; padding: 0; }
+  .main-content {
+    grid-template-columns: 1fr !important;
+    padding: 4.5rem 1rem 2rem !important;
+    max-width: 100% !important;
+    gap: 1.25rem !important;
+  }
+  .todo-list { max-height: 340px; overflow-y: auto; }
+  .study-clock { font-size: 6rem !important; }
+  .settings-overlay { padding: 1rem 0.75rem; align-items: flex-end; }
+  .settings-panel { max-width: 100%; border-radius: 20px; }
+  .todo-context-menu { right: auto; left: 0; }
+  .timer-link-dropdown { width: calc(100vw - 2rem); left: 50%; transform: translateX(-50%); }
+  .notes-grid { grid-template-columns: 1fr; }
+  .footer-popover { left: auto; right: 0; transform: none; }
+  input[type="text"],
+  input[type="number"],
+  textarea { font-size: 16px !important; }
+  .date-picker-panel {
+    position: fixed;
+    bottom: 1rem; left: 1rem; right: 1rem;
+    width: auto; top: auto;
+    border-radius: 20px;
+    z-index: 3000;
+  }
+}
+
+/* Tablet */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  :root { --ring-size: 255px; }
+  .main-content {
+    grid-template-columns: 1fr !important;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 5rem 1.5rem 2rem !important;
+  }
+  .study-clock { font-size: 7rem !important; }
+  .todo-list { max-height: 420px; overflow-y: auto; }
+}
+
+/* Desktop */
+@media screen and (min-width: 1024px) {
+  .main-content {
+    grid-template-columns: 1fr 440px;
+    gap: 2rem;
+    padding: 5.5rem 2rem 2rem !important;
+    max-width: 1400px;
+    align-items: start;
+  }
+  .todo-list { max-height: none; overflow-y: visible; }
+}
+
+@media screen and (min-width: 1280px) {
+  .main-content { grid-template-columns: 1fr 480px; }
+}
+
+/* High DPI / Retina — sharper borders */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .todo-card,
+  .timer-card,
+  .flashcard-front,
+  .flashcard-back,
+  .fc-front,
+  .fc-back {
+    border-width: 0.5px;
+  }
+}
+
+/* Landscape on short phones (iPhone SE landscape, etc.) */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .main-content { padding-top: 3.5rem !important; }
+  .study-clock { font-size: 4rem !important; }
+  .timer-ring-area { padding: 1rem 0; }
+  .intro-content-gsap { gap: 0.75rem; }
+  .intro-logo-img-gsap { width: 60px; height: 60px; }
+  .intro-logo-text-gsap { font-size: 1.5rem; }
+  .settings-overlay { align-items: flex-start; padding-top: 0.5rem; }
+}
+
+/* Print — just in case */
+@media print {
+  .topbar, .app-footer, .toast-container, .ambient-orb,
+  .noise-overlay, .day-progress-track { display: none !important; }
+  .main-content { padding-top: 1rem !important; }
+}
+

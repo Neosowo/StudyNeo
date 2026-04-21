@@ -13,6 +13,7 @@ import {
   Shield, ScrollText, MoreHorizontal, Sparkles, Volume2, VolumeX
 } from 'lucide-react'
 import { setMuted } from './utils/sounds'
+import { useDevice } from './utils/useDevice'
 
 /* ── Service Worker (ACTIVADO) ──────────── */
 if ('serviceWorker' in navigator) {
@@ -467,6 +468,7 @@ const isLowEndDevice = () => {
 };
 
 export default function App() {
+  const device          = useDevice()
   const [isLowEnd]      = useState(isLowEndDevice)
   const [showIntro,     setShowIntro]     = useState(() => {
     // Check if intro was already played in this session to skip on refresh (F5)
@@ -588,7 +590,7 @@ export default function App() {
   }
 
   return (
-    <div className={`app-container ${isZen ? 'mode-zen' : ''} ${isIdle ? 'is-idle' : ''} ${isLowEnd ? 'is-low-end' : ''}`}>
+    <div className={`app-container ${isZen ? 'mode-zen' : ''} ${isIdle ? 'is-idle' : ''} ${isLowEnd ? 'is-low-end' : ''} ${device.classes}`}>
       {/* Intro animation */}
       {showIntro && <IntroScreen onDone={() => {
         setShowIntro(false)
