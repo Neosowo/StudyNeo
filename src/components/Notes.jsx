@@ -5,20 +5,65 @@ import {
   ChevronLeft, Clock, Search, Copy, Download, Tag, Eye, Edit3, Sigma
 } from 'lucide-react'
 
-/* ── KaTeX lazy loader ──────────────────────────────────── */
+/* ── KaTeX lazy loader (con SRI para seguridad) ─────────── */
 let katexLoaded = false
 function loadKatex() {
   if (katexLoaded || document.getElementById('katex-css')) return
   const link = Object.assign(document.createElement('link'), {
     rel: 'stylesheet', id: 'katex-css',
-    href: 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css'
+    href: 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css',
+    integrity: 'sha384-n8MVd4RsNIU0tAv4RzvK/UsTj2stfLJ4mWBhw8PDsKk5QBR0rBfaImkUSfLEj88',
+    crossOrigin: 'anonymous',
   })
   document.head.appendChild(link)
   const script = Object.assign(document.createElement('script'), {
     src: 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js',
+    integrity: 'sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l',
+    crossOrigin: 'anonymous',
     onload: () => { katexLoaded = true }
   })
   document.head.appendChild(script)
+}
+
+/* ── Sanitizador HTML (previene XSS en el preview) ───────── */
+const ALLOWED_TAGS = new Set([
+  'p','br','strong','em','del','code','h1','h2','h3','ul','li','hr','span','div','svg',
+  // KaTeX genera estos:
+  'math','mrow','mn','mi','mo','msup','msub','mfrac','msqrt','mtext',
+  'annotation','semantics','mspace','mover','munder','mstyle',
+])
+const ALLOWED_ATTRS = new Set([
+  'class','style','aria-hidden','focusable','role','viewBox','xmlns',
+  'width','height','d','fill','stroke','stroke-width','x','y',
+])
+
+function sanitizeHtml(html) {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+  function clean(node) {
+    if (node.nodeType === Node.TEXT_NODE) return
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      if (!ALLOWED_TAGS.has(node.tagName.toLowerCase())) {
+        node.replaceWith(document.createTextNode(node.textContent))
+        return
+      }
+      // Remove disallowed attributes
+      for (const attr of [...node.attributes]) {
+        if (!ALLOWED_ATTRS.has(attr.name.toLowerCase())) {
+          node.removeAttribute(attr.name)
+        }
+        // Block javascript: in style/href/src
+        if (['style','href','src'].includes(attr.name.toLowerCase())) {
+          if (/javascript:/i.test(attr.value)) {
+            node.removeAttribute(attr.name)
+          }
+        }
+      }
+    }
+    for (const child of [...node.childNodes]) clean(child)
+  }
+  for (const child of [...doc.body.childNodes]) clean(child)
+  return doc.body.innerHTML
 }
 
 /* ── Markdown + LaTeX renderer ──────────────────────────── */
@@ -196,7 +241,8 @@ function NoteEditor({ note, onSave, onBack }) {
       {preview ? (
         <div
           className="notes-preview"
-          dangerouslySetInnerHTML={{ __html: text ? renderMarkdown(text) : '<p style="color:var(--text-4);font-style:italic">Sin contenido…</p>' }}
+          // sanitizeHtml() previene XSS filtrando tags/attrs no permitidos
+          dangerouslySetInnerHTML={{ __html: text ? sanitizeHtml(renderMarkdown(text)) : '<p style="color:var(--text-4);font-style:italic">Sin contenido…</p>' }}
           style={{ background: col.bg }}
         />
       ) : (

@@ -18,7 +18,7 @@ try {
   const app = initializeApp(firebaseConfig)
   db = getDatabase(app)
 } catch (e) {
-  console.warn('Firebase init error:', e.message)
+  /* Firebase no disponible */
 }
 
 export { db, ref, onValue, runTransaction, push, serverTimestamp, set, onDisconnect }

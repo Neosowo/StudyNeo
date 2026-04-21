@@ -158,7 +158,10 @@ function DayProgressBar() {
 /* LIKE BUTTON (Firebase)                                     */
 /* ══════════════════════════════════════════════════════════ */
 function LikeButton() {
-  const [likes,     setLikes]     = useState(null)
+  const [likes,     setLikes]     = useState(() => {
+    const cached = localStorage.getItem('studyneo_likes_cache')
+    return cached !== null ? parseInt(cached) : null
+  })
   const [liked,     setLiked]     = useState(() => localStorage.getItem('postpone_liked') === '1')
   const [animating, setAnimating] = useState(false)
   const [bump,      setBump]      = useState(false)
@@ -168,19 +171,26 @@ function LikeButton() {
   useEffect(() => {
     if (!db) return
     const likesRef = ref(db, 'postpone/likes')
-    const unsub = onValue(likesRef, snap => {
-      const val = snap.val() || 0
-      setLikes(prev => {
-        // Trigger bump animation if value changed (from anyone)
-        if (prevLikesRef.current !== null && val !== prevLikesRef.current) {
-          clearTimeout(bumpTimerRef.current)
-          setBump(true)
-          bumpTimerRef.current = setTimeout(() => setBump(false), 500)
-        }
-        prevLikesRef.current = val
-        return val
-      })
-    })
+    const unsub = onValue(
+      likesRef,
+      snap => {
+        const val = snap.val() || 0
+        setLikes(prev => {
+          if (prevLikesRef.current !== null && val !== prevLikesRef.current) {
+            clearTimeout(bumpTimerRef.current)
+            setBump(true)
+            bumpTimerRef.current = setTimeout(() => setBump(false), 500)
+          }
+          prevLikesRef.current = val
+          return val
+        })
+        localStorage.setItem('studyneo_likes_cache', String(val))
+      },
+      () => {
+        const cached = localStorage.getItem('studyneo_likes_cache')
+        if (cached !== null) setLikes(parseInt(cached))
+      }
+    )
     return () => { unsub(); clearTimeout(bumpTimerRef.current) }
   }, [])
 
@@ -300,36 +310,86 @@ function SettingsPanel({ settings, onSave, onClose, sessions, totalSecs, theme, 
   const importData = (e) => {
     const file = e.target.files[0]
     if (!file) return
+    // Límite de tamaño: 2 MB
+    if (file.size > 2 * 1024 * 1024) {
+      addToast('Archivo demasiado grande (máx. 2 MB)', 'error')
+      return
+    }
     const reader = new FileReader()
     reader.onload = ev => {
       try {
         const raw = ev.target.result.trim()
         let data;
-        
+
         if (raw.startsWith('{')) {
           // Legacy support for JSON
           data = JSON.parse(raw)
         } else {
           // New .neo format (encoded.checksum)
-          const [encoded, checksum] = raw.split('.')
+          const dotIdx = raw.lastIndexOf('.')
+          if (dotIdx === -1) throw new Error('Formato de archivo inválido')
+          const encoded  = raw.slice(0, dotIdx)
+          const checksum = raw.slice(dotIdx + 1)
           const json = decodeURIComponent(atob(encoded))
           const currentChecksum = json.split('').reduce((a, b) => a + b.charCodeAt(0), 0)
-          
+
           if (parseInt(checksum) !== currentChecksum) {
             throw new Error('Archivo corrupto o manipulado')
           }
           data = JSON.parse(json)
         }
 
-        if (data.todos) storage.set(KEYS.TODOS, data.todos)
-        if (data.notes) storage.set(KEYS.NOTES, data.notes)
-        if (data.settings) storage.set(KEYS.SETTINGS, data.settings)
+        // ── Validación estricta de tipos ──────────────────────────
+        if (typeof data !== 'object' || data === null) throw new Error('Datos inválidos')
+
+        if (data.todos !== undefined) {
+          if (!Array.isArray(data.todos)) throw new Error('Campo "todos" inválido')
+          if (data.todos.length > 500) throw new Error('Demasiadas tareas en el archivo')
+          // Sanitizar cada tarea
+          const sanitizedTodos = data.todos.map(t => ({
+            id:       typeof t.id === 'number' ? t.id : Date.now(),
+            text:     typeof t.text === 'string' ? t.text.slice(0, 120) : '',
+            done:     Boolean(t.done),
+            priority: ['none','low','med','high'].includes(t.priority) ? t.priority : 'none',
+            tag:      typeof t.tag === 'string' ? t.tag.slice(0, 30) : '',
+            dueDate:  typeof t.dueDate === 'string' ? t.dueDate : null,
+          }))
+          storage.set(KEYS.TODOS, sanitizedTodos)
+        }
+        if (data.notes !== undefined) {
+          if (typeof data.notes !== 'string' && !Array.isArray(data.notes))
+            throw new Error('Campo "notes" inválido')
+          storage.set(KEYS.NOTES, data.notes)
+        }
+        if (data.settings !== undefined) {
+          if (typeof data.settings !== 'object' || data.settings === null)
+            throw new Error('Campo "settings" inválido')
+          // Solo copiamos claves reconocidas
+          const safeSettings = {
+            pomodoro:          Math.max(1, Math.min(99,  parseInt(data.settings.pomodoro)  || 25)),
+            short:             Math.max(1, Math.min(60,  parseInt(data.settings.short)      || 5)),
+            long:              Math.max(1, Math.min(60,  parseInt(data.settings.long)       || 15)),
+            longBreakInterval: Math.max(1, Math.min(10,  parseInt(data.settings.longBreakInterval) || 4)),
+            autoStart:  Boolean(data.settings.autoStart),
+            lang:       ['es','en'].includes(data.settings.lang) ? data.settings.lang : 'es',
+            showTodos:  data.settings.showTodos  !== false,
+            showCards:  data.settings.showCards  !== false,
+            showCalc:   data.settings.showCalc   !== false,
+            showNotes:  data.settings.showNotes  !== false,
+            showLofi:   data.settings.showLofi   !== false,
+            ultraFocus: Boolean(data.settings.ultraFocus),
+            muteSounds: Boolean(data.settings.muteSounds),
+          }
+          storage.set(KEYS.SETTINGS, safeSettings)
+        }
         if (data.stats) {
-          storage.set('postpone_timer_sessions', data.stats.sessions || 0)
-          storage.set('postpone_timer_total', data.stats.totalSeconds || 0)
+          const sessions = Math.max(0, parseInt(data.stats.sessions) || 0)
+          const totalSec = Math.max(0, parseInt(data.stats.totalSeconds) || 0)
+          storage.set('postpone_timer_sessions', sessions)
+          storage.set('postpone_timer_total',    totalSec)
         }
         window.location.reload()
-      } catch (err) { alert('Error: ' + err.message) }
+      } catch (err) { addToast('Error al importar: ' + err.message, 'error') }
     }
     reader.readAsText(file)
   }
