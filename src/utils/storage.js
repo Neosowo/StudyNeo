@@ -20,4 +20,5 @@ export const KEYS = {
   THEME:      'postpone_theme',
   GOAL:       'postpone_goal',
   FLASHCARDS: 'postpone_flashcards',
+  EVENTS:     'postpone_events',
 }

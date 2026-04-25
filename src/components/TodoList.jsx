@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { CalendarDays, MoreHorizontal, CheckCheck, Brain, Plus, AlertCircle, Clock, CheckCircle2, ListTodo, Calculator, FileText, Lightbulb, X, ChevronRight, ChevronLeft, Trash2, PlusCircle, MinusCircle, TrendingUp, BookOpen, StickyNote } from 'lucide-react'
 import Notes from './Notes'
 import DatePicker from './DatePicker'
+import Schedule from './Schedule'
 import { storage, KEYS } from '../utils/storage'
 import { getT } from '../locales'
 import { playClick, playTaskDone, playComplete } from '../utils/sounds'
@@ -372,6 +373,7 @@ export default function TodoList({ onToast, onConvertToFlashcard, modules = {}, 
     (modules.showCards !== false) ? { id: 'cards', label: t.mod_cards, Icon: Brain } : null,
     (modules.showNotes !== false) ? { id: 'notes', label: t.mod_notes, Icon: FileText } : null,
     (modules.showCalc  !== false) ? { id: 'calc',  label: t.mod_calc, Icon: Calculator } : null,
+    { id: 'schedule', label: 'Calendario', Icon: CalendarDays },
   ].filter(Boolean)
 
   useEffect(() => {
@@ -532,6 +534,7 @@ export default function TodoList({ onToast, onConvertToFlashcard, modules = {}, 
             <Notes integrated={true} />
           </div>
         )}
+        {activeTab==='schedule' && <Schedule integrated={true} />}
       </div>
     </div>
   )

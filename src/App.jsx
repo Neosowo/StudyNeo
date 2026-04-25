@@ -10,7 +10,8 @@ import { getT } from './locales'
 import {
   Sun, Moon, Settings, X, StickyNote, WifiOff, MessageSquare,
   Download, Heart, Github, ExternalLink, CheckCircle2, AlertTriangle, Info, Clock, Upload,
-  Shield, ScrollText, MoreHorizontal, Sparkles, Volume2, VolumeX, BookOpen, Mail
+  Shield, ScrollText, MoreHorizontal, Sparkles, Volume2, VolumeX, BookOpen, Mail,
+  ListTodo, Calendar as CalendarIcon
 } from 'lucide-react'
 import { setMuted } from './utils/sounds'
 import { useDevice } from './utils/useDevice'
