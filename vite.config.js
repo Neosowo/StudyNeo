@@ -19,7 +19,10 @@ export default defineConfig(({ command }) => {
           foro: './foro.html',
           donar: './donar.html',
           privacidad: './privacidad.html',
-          terminos: './terminos.html'
+          terminos: './terminos.html',
+          about: './about.html',
+          tips: './tips.html',
+          contacto: './contacto.html'
         }
       }
     }

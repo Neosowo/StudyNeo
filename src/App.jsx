@@ -10,7 +10,7 @@ import { getT } from './locales'
 import {
   Sun, Moon, Settings, X, StickyNote, WifiOff, MessageSquare,
   Download, Heart, Github, ExternalLink, CheckCircle2, AlertTriangle, Info, Clock, Upload,
-  Shield, ScrollText, MoreHorizontal, Sparkles, Volume2, VolumeX
+  Shield, ScrollText, MoreHorizontal, Sparkles, Volume2, VolumeX, BookOpen, Mail
 } from 'lucide-react'
 import { setMuted } from './utils/sounds'
 import { useDevice } from './utils/useDevice'
@@ -735,6 +735,14 @@ export default function App() {
                 <MessageSquare size={14} /> Sugerencias
               </a>
 
+              <a href={`${import.meta.env.BASE_URL}tips.html`} className="footer-link">
+                <BookOpen size={14} /> Consejos
+              </a>
+
+              <a href={`${import.meta.env.BASE_URL}about.html`} className="footer-link">
+                <Info size={14} /> Nosotros
+              </a>
+
               <a href="https://github.com/neosowo" target="_blank" rel="noreferrer" className="footer-link">
                 <Github size={14} /> GitHub
               </a>
@@ -749,6 +757,9 @@ export default function App() {
                 
                 {footerMenuOpen && (
                   <div className="footer-popover animate-scale">
+                    <a href={`${import.meta.env.BASE_URL}contacto.html`} className="footer-popover-item">
+                      <Mail size={12} /> Contacto
+                    </a>
                     <a href={`${import.meta.env.BASE_URL}privacidad.html`} className="footer-popover-item">
                       <Shield size={12} /> Privacidad
                     </a>

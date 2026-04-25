@@ -204,9 +204,18 @@ export default function FeedbackForum({ onBack, lang = 'es' }) {
                   <div style={{ width: 24, height: 24, background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '10px' }}>U</div>
                   Usuario Anónimo
                 </span>
-                <span style={{ background: 'var(--bg-hover)', padding: '4px 8px', borderRadius: '6px' }}>
-                  {new Date(msg.timestamp).toLocaleString(lang === 'es' ? 'es-ES' : 'en-US', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ background: 'var(--bg-hover)', padding: '4px 8px', borderRadius: '6px' }}>
+                    {new Date(msg.timestamp).toLocaleString(lang === 'es' ? 'es-ES' : 'en-US', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  <button 
+                    onClick={() => alert('Mensaje reportado. Nuestro equipo lo revisará pronto.')} 
+                    style={{ background: 'none', border: 'none', color: 'var(--text-4)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                    title="Reportar este mensaje"
+                  >
+                    <ShieldAlert size={14} />
+                  </button>
+                </div>
               </div>
               <p style={{ margin: 0, fontSize: '14.5px', color: 'var(--text-1)', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
                 {msg.text}
