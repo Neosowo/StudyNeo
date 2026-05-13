@@ -1,2 +1,0 @@
-
-window.modules = window.modules || [];
