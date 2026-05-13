@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Privacidad - PyNeo</title>
+    <!-- GOOGLE ADSENSE -->
+    <meta name="google-adsense-account" content="ca-pub-8771484945698756">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8771484945698756"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="js/media/favicon.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap');
+
+        :root {
+            --primary: #6366f1;
+            --bg-dark: #09090b;
+            --terminal-bg: #1e1e2e;
+            --text-main: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Google Sans Code', sans-serif;
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.08) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .neon-box {
+            background: rgba(30, 30, 46, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .text-neon-green {
+            color: #4ade80;
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .nav-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(9, 9, 11, 0.7);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="nav-fixed">
+        <div class="container mx-auto px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3 group cursor-pointer hover:opacity-90 transition-opacity"
+                    onclick="window.location.href='index.html'">
+                    <img src="js/media/favicon.png" alt="PyNeo Logo"
+                        class="w-10 h-10 object-contain">
+                    <div class="flex flex-col justify-center">
+                        <h1 class="text-3xl font-black tracking-tight text-white select-none">
+                            PyNeo
+                        </h1>
+                    </div>
+                </div>
+                <a href="index.html" class="text-sm font-bold text-gray-400 hover:text-white transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Volver al Inicio
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-32 flex-grow max-w-4xl">
+        <h1 class="text-4xl md:text-5xl font-black text-white mb-2">Política de Privacidad</h1>
+        <p class="text-gray-400 mb-8">Última actualización: Febrero 2026</p>
+
+        <div class="neon-box p-8 space-y-8 text-gray-300 leading-relaxed">
+            <section>
+                <h2 class="text-xl font-bold text-white mb-3">1. Recopilación de Información</h2>
+                <p>PyNeo no recopila información personal identificable como nombres, correos electrónicos o direcciones
+                    IP. Todo el procesamiento de código y ejecución de ejercicios se realiza directamente en tu
+                    navegador.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-white mb-3">2. Almacenamiento de Datos (LocalStorage)</h2>
+                <p>Para mejorar tu experiencia de aprendizaje, utilizamos el almacenamiento local (LocalStorage) de tu
+                    navegador para guardar tu progreso, puntajes y preferencias. Estos datos permanecen en tu
+                    dispositivo y no se envían a nuestros servidores.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-white mb-3">3. Enlaces a Terceros</h2>
+                <p>Nuestra plataforma puede contener enlaces a sitios externos, como plataformas de donación (Ko-fi). No
+                    somos responsables de las prácticas de privacidad de estos sitios y te recomendamos revisar sus
+                    propias políticas.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-white mb-3">4. Cookies</h2>
+                <p>No utilizamos cookies propias para seguimiento o publicidad. Sin embargo, servicios de terceros
+                    integrados pueden utilizarlas según sus propias políticas.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-white mb-3">5. Contacto</h2>
+                <p>Si tienes preguntas sobre nuestra política de privacidad, puedes contactarnos a través de los canales
+                    proporcionados en la plataforma (GitHub).</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-white mb-3">6. Datos del Chat</h2>
+                <p>Los mensajes enviados al chat global son públicos y visibles por cualquier usuario conectado en ese
+                    momento.
+                    No almacenamos historial de mensajes a largo plazo; el sistema está diseñado para mostrar solo los
+                    mensajes del día actual. Por seguridad, evite compartir información personal (nombres reales,
+                    direcciones, teléfonos) en este espacio público.</p>
+            </section>
+        </div>
+    </main>
+
+    <footer class="mt-20 py-10 border-t border-white/5 bg-black/40 backdrop-blur-sm relative">
+        <div class="absolute inset-0 bg-gradient-to-t from-neon-purple/5 to-transparent pointer-events-none"></div>
+        <div class="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+
+            <div class="text-center md:text-left">
+                <p class="text-gray-500 text-sm font-mono flex items-center gap-2 justify-center md:justify-start">
+                    &copy; 2026 <span class="text-white font-bold tracking-tight">PyNeo</span>
+                </p>
+                <p class="text-xs text-gray-600 mt-1">Hecho con <i
+                        class="fas fa-heart text-red-500 mx-1 animate-pulse"></i> por <a
+                        href="https://github.com/Neosowo" target="_blank"
+                        class="text-neon-green hover:underline">Erick</a></p>
+                <p class="text-[10px] text-gray-700 mt-3 font-mono uppercase tracking-widest">
+                    Última actualización: 23 Feb 2026
+                </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+
+                <a href="https://ko-fi.com/neosowo" target="_blank"
+                    class="group relative inline-flex items-center gap-3 px-6 py-3 bg-[#13C3FF]/10 hover:bg-[#13C3FF]/20 border border-[#13C3FF]/30 hover:border-[#13C3FF]/50 rounded-xl transition-all duration-300 hover:shadow-[0_0_20px_rgba(19,195,255,0.3)] hover:-translate-y-1">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-[#13C3FF]/0 via-[#13C3FF]/10 to-[#13C3FF]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer">
+                    </div>
+                    <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi" class="w-6 h-6 animate-bounce"
+                        style="animation-duration: 3s;">
+                    <span class="font-bold text-[#13C3FF] group-hover:text-white transition-colors">Invítame un
+                        café</span>
+                </a>
+
+                <button onclick="showDeunaQR()"
+                    class="group relative inline-flex items-center gap-3 px-6 py-3 bg-[#FFDD00]/10 hover:bg-[#FFDD00]/20 border border-[#FFDD00]/30 hover:border-[#FFDD00]/50 rounded-xl transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,221,0,0.3)] hover:-translate-y-1">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-[#FFDD00]/0 via-[#FFDD00]/10 to-[#FFDD00]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer">
+                    </div>
+                    <i class="fas fa-qrcode text-[#FFDD00] animate-pulse"></i>
+                    <span class="font-bold text-[#FFDD00] group-hover:text-white transition-colors">Donar con
+                        Deuna</span>
+                </button>
+            </div>
+
+            <div class="flex gap-6 opacity-80 text-gray-500 text-xs font-mono">
+                <div class="relative group/data">
+                    <button onclick="toggleDataMenu(event)"
+                        class="hover:text-primary transition-colors flex items-center gap-1">
+                        <i class="fas fa-file-export"></i> Datos
+                    </button>
+                    <div id="data-menu"
+                        class="hidden absolute bottom-full right-0 mb-4 w-48 neon-box p-2 shadow-2xl backdrop-blur-xl border border-white/10 z-[101]">
+                        <button onclick="exportProgress()"
+                            class="w-full text-left px-4 py-2 text-[10px] font-black tracking-widest hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2">
+                            <i class="fas fa-upload text-primary"></i> EXPORTAR
+                        </button>
+                        <button onclick="importProgressTrigger()"
+                            class="w-full text-left px-4 py-2 text-[10px] font-black tracking-widest hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2">
+                            <i class="fas fa-download text-neon-green"></i> IMPORTAR
+                        </button>
+                        <div class="h-px bg-white/5 my-1"></div>
+                        <button onclick="resetProgress()"
+                            class="w-full text-left px-4 py-2 text-[10px] font-black tracking-widest hover:bg-red-500/10 text-red-400/70 hover:text-red-500 rounded-lg transition-colors flex items-center gap-2">
+                            <i class="fas fa-redo-alt"></i> REINICIAR PROGRESO
+                        </button>
+                        <p class="px-4 py-1 text-[8px] text-gray-500 italic">Respalda tu progreso local</p>
+                    </div>
+                </div>
+                <input type="file" id="import-progress-file" class="hidden" accept=".pyn">
+                <a href="terms.html" class="hover:text-neon-green transition-colors">Términos</a>
+                <a href="privacy.html" class="hover:text-neon-green transition-colors">Privacidad</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

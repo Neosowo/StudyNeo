@@ -1,15 +1,1413 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="StudyNeo — La mejor herramienta de productividad para estudiantes. Incluye Temporizador Pomodoro, lista de tareas, flashcards y notas. Estudia de forma inteligente y gratuita." />
-    <meta name="keywords" content="estudio, productividad, pomodoro, temporizador, tareas, flashcards, notas, examen, universidad, enfoque, zen mode" />
-    <title>StudyNeo — Potencia tu Productividad y Enfoque</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyNeo</title>
+    <link rel="manifest" href="manifest.json">
+
+
+    <meta name="description"
+        content="Plataforma interactiva para aprender Python con ejercicios prácticos, compilador integrado y niveles desde principiante hasta experto.">
+    <meta property="og:title" content="PyNeo - Domina Python desde Cero">
+    <meta property="og:description"
+        content="Aprende programación de forma interactiva. Ejercicios reales, retos con tiempo y compilador de Python en el navegador.">
+    <meta property="og:image" content="https://neosowo.github.io/PyNeo/js/media/favicon.png">
+    <meta property="og:url" content="https://neosowo.github.io/PyNeo/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="PyNeo">
+
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PyNeo - Aprende Python">
+    <meta name="twitter:description" content="Ejercicios prácticos y ruta de aprendizaje interactiva.">
+    <meta name="twitter:image" content="https://neosowo.github.io/PyNeo/js/media/favicon.png">
+
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <!-- GOOGLE ADSENSE -->
+    <meta name="google-adsense-account" content="ca-pub-8771484945698756">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8771484945698756"
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+    <link rel="icon" type="image/png" href="js/media/favicon.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        ::selection {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4338ca;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --bg-dark: #09090b;
+            --bg-panel: #18181b;
+            --terminal-bg: #1e1e2e;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
+        .glitch-text {
+            position: relative;
+            color: white;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: glitch-skew 1s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            left: 2px;
+            text-shadow: -2px 0 #ff00c1;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 2s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            left: -2px;
+            text-shadow: -2px 0 #00fff9;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 3s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% {
+                clip: rect(2px, 9999px, 86px, 0);
+                transform: skew(0.85deg);
+            }
+
+            5% {
+                clip: rect(30px, 9999px, 16px, 0);
+                transform: skew(0.85deg);
+            }
+
+            10% {
+                clip: rect(6px, 9999px, 44px, 0);
+                transform: skew(0.85deg);
+            }
+
+            15% {
+                clip: rect(54px, 9999px, 20px, 0);
+                transform: skew(0.85deg);
+            }
+
+            20% {
+                clip: rect(10px, 9999px, 2px, 0);
+                transform: skew(0.85deg);
+            }
+
+            25% {
+                clip: rect(66px, 9999px, 62px, 0);
+                transform: skew(0.85deg);
+            }
+
+            30% {
+                clip: rect(18px, 9999px, 86px, 0);
+                transform: skew(0.85deg);
+            }
+
+            35% {
+                clip: rect(8px, 9999px, 26px, 0);
+                transform: skew(0.85deg);
+            }
+
+            40% {
+                clip: rect(24px, 9999px, 72px, 0);
+                transform: skew(0.85deg);
+            }
+
+            45% {
+                clip: rect(62px, 9999px, 18px, 0);
+                transform: skew(0.85deg);
+            }
+
+            50% {
+                clip: rect(32px, 9999px, 92px, 0);
+                transform: skew(0.85deg);
+            }
+
+            55% {
+                clip: rect(12px, 9999px, 46px, 0);
+                transform: skew(0.85deg);
+            }
+
+            60% {
+                clip: rect(78px, 9999px, 32px, 0);
+                transform: skew(0.85deg);
+            }
+
+            65% {
+                clip: rect(42px, 9999px, 16px, 0);
+                transform: skew(0.85deg);
+            }
+
+            70% {
+                clip: rect(2px, 9999px, 82px, 0);
+                transform: skew(0.85deg);
+            }
+
+            75% {
+                clip: rect(58px, 9999px, 28px, 0);
+                transform: skew(0.85deg);
+            }
+
+            80% {
+                clip: rect(16px, 9999px, 64px, 0);
+                transform: skew(0.85deg);
+            }
+
+            85% {
+                clip: rect(38px, 9999px, 12px, 0);
+                transform: skew(0.85deg);
+            }
+
+            90% {
+                clip: rect(84px, 9999px, 56px, 0);
+                transform: skew(0.85deg);
+            }
+
+            95% {
+                clip: rect(26px, 9999px, 40px, 0);
+                transform: skew(0.85deg);
+            }
+
+            100% {
+                clip: rect(66px, 9999px, 14px, 0);
+                transform: skew(0.85deg);
+            }
+        }
+
+        @keyframes glitch-anim2 {
+            0% {
+                clip: rect(51px, 9999px, 42px, 0);
+            }
+
+            100% {
+                clip: rect(31px, 9999px, 10px, 0);
+            }
+        }
+
+        body {
+            font-family: 'Google Sans Code', sans-serif;
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(121, 72, 236, 0.08) 0%, transparent 50%);
+            color: var(--text-main);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+
+
+
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+
+        .nav-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+
+            backdrop-filter: blur(16px);
+
+            transition: all 0.3s ease;
+            border-radius: 12px;
+        }
+
+        .nav-fixed.scrolled {
+            background: rgba(9, 9, 11, 0.7);
+            backdrop-filter: blur(24px);
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+
+        .code-editor {
+            position: relative;
+            background: var(--terminal-bg);
+            border: 1px solid #3f3f46;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5);
+            padding-top: 40px !important;
+
+            overflow: hidden;
+            transition: border-color 0.3s;
+            margin-bottom: 0;
+
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .code-editor:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+
+        .code-editor::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 36px;
+            background: #27272a;
+            border-bottom: 1px solid #3f3f46;
+            z-index: 10;
+        }
+
+
+        .code-editor::after {
+            content: ' ';
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+
+            box-shadow: 18px 0 0 #f59e0b, 36px 0 0 #22c55e;
+
+            z-index: 11;
+        }
+
+
+        #lesson-content textarea {
+            background: transparent !important;
+            border: none !important;
+            color: #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 8px 0;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        #lesson-content textarea:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+
+        .code-output {
+            background: #09090b;
+            border: 1px solid #3f3f46;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            position: relative;
+            min-height: 100px;
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #3f3f46 transparent;
+        }
+
+        .code-output::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .code-output::-webkit-scrollbar-thumb {
+            background-color: #3f3f46;
+            border-radius: 10px;
+        }
+
+        .code-output::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .code-output pre {
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .code-output::before {
+            display: none;
+            /* Hide old label as we now have the JS header */
+        }
+
+
+
+        .neon-box {
+            background: rgba(24, 24, 27, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s, background 0.2s, border-color 0.2s;
+        }
+
+        .neon-box.interactive:hover,
+        button.neon-box:hover {
+            background: rgba(39, 39, 42, 0.8);
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+            cursor: pointer;
+        }
+
+        .neon-box-secondary {
+            background: rgba(39, 39, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .neon-box-dark {
+            background: rgba(9, 9, 11, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+
+        .btn-neon {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+            border: none;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-neon:hover {
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+
+        .text-neon-green {
+            color: #818cf8 !important;
+
+            text-shadow: 0 0 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .text-neon-bright {
+            color: #a78bfa !important;
+            text-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        }
+
+        @keyframes modal-in {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-modal-in { animation: modal-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        .gradient-line {
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary) 0%, transparent 100%);
+        }
+
+
+        #modules-grid {
+            padding-bottom: 4rem;
+        }
+
+        .module-card {
+            background: rgba(24, 24, 27, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .module-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+
+        .module-card:hover .progress-ring {
+            transform: rotate(-90deg) scale(1.05);
+            filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.4));
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes glow-pulse {
+
+            0%,
+            100% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.02);
+            }
+        }
+
+        .glow-animate {
+            animation: glow-pulse 3s infinite;
+        }
+
+
+        .syntax-keyword {
+            color: #c084fc;
+            font-weight: bold;
+        }
+
+
+        .syntax-string {
+            color: #4ade80;
+        }
+
+
+        .syntax-number {
+            color: #fbbf24;
+        }
+
+
+        .syntax-comment {
+            color: #64748b;
+            font-style: italic;
+        }
+
+
+        .syntax-function {
+            color: #38bdf8;
+        }
+
+
+
+        .hidden {
+            display: none;
+        }
+
+        .filter-btn {
+            background: rgba(30, 30, 46, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+        }
+
+        .filter-btn:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            color: white;
+        }
+
+        .filter-btn.active {
+            background: var(--primary) !important;
+            color: white !important;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(9, 9, 11, 0.5);
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        footer p span {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        @keyframes pulse-wifi {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 12px rgba(239, 68, 68, 0);
+            }
+        }
+
+        @keyframes shake-no {
+            0% {
+                transform: translateX(0) scale(1);
+            }
+
+            15% {
+                transform: translateX(-6px) scale(0.97);
+            }
+
+            30% {
+                transform: translateX(6px) scale(0.97);
+            }
+
+            45% {
+                transform: translateX(-5px) scale(0.98);
+            }
+
+            60% {
+                transform: translateX(5px) scale(0.98);
+            }
+
+            75% {
+                transform: translateX(-3px);
+            }
+
+            90% {
+                transform: translateX(3px);
+            }
+
+            100% {
+                transform: translateX(0) scale(1);
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <header class="nav-fixed" id="main-nav">
+        <div class="container mx-auto px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3 group cursor-pointer hover:opacity-90 transition-opacity"
+                    onclick="window.location.href='index.html'">
+                    <img src="js/media/favicon.png" alt="PyNeo Logo"
+                        class="w-10 h-10 object-contain">
+                    <div class="flex flex-col justify-center">
+                        <h1 class="text-3xl font-black tracking-tight text-white select-none">
+                            <span class="text-neon-purple"></span> PyNeo
+                        </h1>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <div class="hidden md:flex items-center gap-3 neon-box px-5 py-2">
+                        <span class="text-xs font-semibold text-gray-400">PROGRESO</span>
+                        <span class="text-xl font-bold text-neon-green" id="overall-progress">0%</span>
+                        <i class="fas fa-info-circle text-[10px] text-gray-600 ml-1 cursor-help"
+                            title="Tu progreso se guarda automáticamente en este navegador"></i>
+                    </div>
+
+
+
+                    <div class="flex items-center gap-3 neon-box px-5 py-2">
+                        <span class="text-xs font-semibold text-gray-400">USUARIO</span>
+                        <span class="text-lg font-bold text-neon-green" id="header-user-name">...</span>
+                        <i class="fas fa-user text-[10px] text-gray-600 ml-1"></i>
+                    </div>
+
+                    <div class="flex items-center gap-3 neon-box px-5 py-2 cursor-pointer hover:bg-white/5 transition-all"
+                        id="streak-container" onclick="handleDailyChallengeClick()" title="Desafío Diario">
+                        <span class="text-xl font-bold text-white order-1" id="header-streak-count">0</span>
+                        <i class="fas fa-fire text-gray-500 text-sm transition-all duration-500 order-2"></i>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </header>
+
+
+    <section class="relative min-h-screen flex items-center justify-center" id="hero-section"
+        style="padding-top: 100px;">
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <div class="mb-8">
+                <div class="inline-block neon-box px-6 py-3 mb-6">
+                    <span class="text-sm font-semibold text-neon-green">PROGRAMACIÓN DESDE CERO</span>
+                </div>
+            </div>
+
+            <h1 class="text-6xl md:text-7xl font-black mb-6 leading-tight">
+                <span class="text-neon-green">APRENDE PYTHON</span><br>
+                <span class="text-white">PASO A PASO</span>
+            </h1>
+
+            <p class="text-lg md:text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
+                Domina los fundamentos de la programación con ejercicios prácticos
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+                <button onclick="openModule(0)"
+                    class="btn-neon px-10 py-4 rounded-lg font-bold text-lg flex items-center gap-3">
+
+                    COMENZAR AHORA
+
+                </button>
+            </div>
+
+
+            <div class="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+                <div class="neon-box p-6">
+                    <div class="text-4xl font-black text-neon-green mb-2">14</div>
+                    <div class="text-sm text-gray-400">Unidades</div>
+                </div>
+                <div class="neon-box p-6">
+                    <div class="text-4xl font-black text-neon-green mb-2">40+</div>
+                    <div class="text-sm text-gray-400">Ejercicios</div>
+                </div>
+                <div class="neon-box p-6">
+                    <div class="text-4xl font-black text-neon-green mb-2">100%</div>
+                    <div class="text-sm text-gray-400">Gratis</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="py-20 relative" id="modules-section">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <div class="inline-block neon-box px-6 py-3 mb-6">
+                    <span class="text-sm font-semibold text-neon-green">RUTA DE APRENDIZAJE</span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-black mb-6 text-white">
+                    UNIDADES DE ESTUDIO
+                </h2>
+                <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+                    Desde los fundamentos hasta análisis de datos con Pandas
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 relative" id="modules-grid">
+
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 relative" id="exercises-section">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <div class="inline-block neon-box px-6 py-3 mb-6">
+                    <span class="text-sm font-semibold text-neon-green">PRÁCTICA INTENSIVA</span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-black mb-6 text-white">
+                    EJERCICIOS
+                </h2>
+                <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+                    Pon a prueba tus conocimientos con ejercicios diseñados para reforzar lo aprendido
+                </p>
+                <div class="mt-8">
+                    <a href="ejercicios.html" class="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white">
+                        <i class="fas fa-external-link-alt text-neon-green"></i> Ir a Resolución de Ejercicios
+                    </a>
+                </div>
+            </div>
+
+            <div
+                class="flex flex-col md:flex-row gap-6 mb-12 justify-between items-center bg-black/40 p-6 rounded-2xl border border-white/5 backdrop-blur-sm reveal">
+                <div class="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide w-full md:w-auto">
+                    <button onclick="filterEvaluations('todos')"
+                        class="filter-btn active px-5 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap uppercase tracking-widest">TODOS</button>
+                    <button onclick="filterEvaluations('principiante')"
+                        class="filter-btn px-5 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap uppercase tracking-widest border-green-500/20 hover:border-green-500/50">PRINCIPIANTE</button>
+                    <button onclick="filterEvaluations('intermedio')"
+                        class="filter-btn px-5 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap uppercase tracking-widest border-yellow-500/20 hover:border-yellow-500/50">INTERMEDIO</button>
+                    <button onclick="filterEvaluations('avanzado')"
+                        class="filter-btn px-5 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap uppercase tracking-widest border-red-500/20 hover:border-red-500/50">AVANZADO</button>
+                    <button onclick="filterEvaluations('experto')"
+                        class="filter-btn px-5 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap uppercase tracking-widest border-purple-500/20 hover:border-purple-500/50">EXPERTO</button>
+                    <button onclick="filterEvaluations('máster')"
+                        class="filter-btn px-5 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap uppercase tracking-widest border-cyan-500/20 hover:border-cyan-500/50">MÁSTER</button>
+                    <button onclick="filterEvaluations('oculto')" id="secret-section-btn"
+                        class="hidden filter-btn px-5 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap uppercase tracking-widest border-white/20 hover:border-white/50 text-gray-500 hover:text-white animate-pulse"><i
+                            class="fas fa-lock-open mr-2"></i>SECRETO</button>
+                </div>
+                <div class="relative w-full md:w-80">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                    <input type="text" id="eval-search" oninput="searchEvaluations()"
+                        placeholder="Buscar por título o contenido..."
+                        class="w-full bg-[#09090b] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-neon-green transition-all placeholder:text-gray-600">
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 relative" id="evaluations-grid">
+
+            </div>
+
+
+            <div class="text-center mt-12">
+                <div class="neon-box inline-block p-6">
+                    <p class="text-gray-300 mb-4">
+                        <i class="fas fa-info-circle text-neon-green mr-2"></i>
+                        Los ejercicios están diseñados para complementar las unidades de estudio
+                    </p>
+                    <p class="text-sm text-gray-500">
+                        Completa las unidades primero para obtener mejores resultados
+                    </p>
+                </div>
+                <div id="unlock-notification"
+                    class="hidden mt-8 p-4 bg-white/5 border border-white/10 rounded-xl animate-bounce">
+                    <p class="text-neon-green font-bold text-sm uppercase tracking-widest"><i
+                            class="fas fa-unlock mr-2"></i>¡Nueva Sección Desbloqueada!</p>
+                    <p class="text-gray-400 text-xs">Has desbloqueado los Retos Ocultos.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <section class="hidden py-20 relative" id="evaluation-content" style="padding-top: 40px;">
+        <div class="container mx-auto px-6 max-w-5xl">
+            <div class="mb-8">
+                <button onclick="closeEvaluation()" class="neon-box px-4 py-2 mb-4 hover:neon-box-blue transition-all">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    <span class="font-semibold">CANCELAR EVALUACIÓN</span>
+                </button>
+                <div class="flex justify-between items-center">
+                    <h2 class="text-3xl font-black text-white mb-2" id="eval-title"></h2>
+                    <div class="text-neon-green font-mono text-xl" id="eval-timer">
+                        <i class="fas fa-clock mr-2"></i><span>00:00</span>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-800 h-2 rounded-full mt-2">
+                    <div class="bg-neon-green h-2 rounded-full transition-all duration-300" id="eval-progress-bar"
+                        style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="neon-box p-8 mb-8" id="question-content">
+
+            </div>
+
+            <div class="code-editor p-6 mb-4">
+                <div class="flex items-center gap-2 mb-4 pb-3 border-b border-white/10">
+                    <span class="text-sm text-gray-400">Tu respuesta:</span>
+                </div>
+                <textarea id="eval-code-editor"
+                    class="w-full bg-transparent text-gray-300 font-mono text-sm outline-none resize-none"
+                    rows="6"></textarea>
+                <button onclick="runEvaluation()" class="btn-neon px-6 py-2 rounded-lg font-semibold text-white mt-4">
+                    <i class="fas fa-play mr-2"></i>Ejecutar y Verificar
+                </button>
+            </div>
+            <div id="eval-output" class="code-output p-4 text-sm mb-8">
+                <p class="text-gray-500">El resultado aparecerá aquí...</p>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <div class="text-gray-400 text-sm">
+                    Puntos acumulados: <span id="current-score" class="text-white font-bold">0</span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="hidden py-20 relative" id="module-content" style="padding-top: 40px;">
+        <div class="container mx-auto px-6 max-w-5xl">
+            <div class="mb-8">
+                <button onclick="closeModule()" class="neon-box px-4 py-2 mb-4 hover:neon-box-blue transition-all">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    <span class="font-semibold">VOLVER</span>
+                </button>
+                <h2 class="text-3xl font-black text-white mb-2" id="module-title"></h2>
+                <p class="text-gray-400" id="module-description"></p>
+            </div>
+
+            <div class="neon-box p-8 mb-8" id="lesson-content">
+
+            </div>
+
+            <div class="flex justify-between items-center">
+                <button onclick="previousLesson()" id="prev-lesson"
+                    class="neon-box px-6 py-3 font-semibold hover:neon-box-blue transition-all">
+                    <i class="fas fa-chevron-left mr-2"></i>ANTERIOR
+                </button>
+                <button onclick="nextLesson()" id="next-lesson" class="btn-neon px-6 py-3 font-semibold">
+                    SIGUIENTE<i class="fas fa-chevron-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+
+    <div class="fixed inset-0 modal-overlay hidden items-center justify-center z-50" id="success-modal">
+        <div class="neon-box p-8 max-w-md mx-4 text-center glow-animate relative">
+
+
+            <img id="success-image" src="" class="w-40 h-auto mx-auto mb-6 rounded-lg shadow-lg hidden object-cover">
+
+
+            <div id="success-icon" class="text-6xl mb-4">
+                <i class="fas fa-trophy text-neon-green"></i>
+            </div>
+
+            <h3 class="text-3xl font-black text-white mb-2" id="success-title">¡Felicidades!</h3>
+            <p class="text-gray-300 mb-6" id="success-message"></p>
+
+            <button onclick="closeSuccessModal()" class="btn-neon px-8 py-3 font-semibold w-full">
+                CONTINUAR
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Actualización -->
+    <div id="update-modal" class="fixed inset-0 z-[300] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeUpdateModal()"></div>
+        <div class="relative bg-[#18181b] border border-white/10 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-modal-in">
+            <div class="p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 bg-neon-green/20 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-rocket text-neon-green text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-white">¡Nueva Actualización!</h2>
+                        <p class="text-gray-500 text-xs uppercase tracking-widest font-bold">Versión 2.1.0 — Mayo 2024</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4 mb-8">
+                    <div class="flex gap-4">
+                        <div class="mt-1 w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+                            <i class="fas fa-check text-[10px] text-blue-400"></i>
+                        </div>
+                        <p class="text-gray-300 text-sm"><span class="text-white font-bold">Repositorio de Ejercicios:</span> Nuevo sistema de carga dinámica por módulos.</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="mt-1 w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
+                            <i class="fas fa-check text-[10px] text-purple-400"></i>
+                        </div>
+                        <p class="text-gray-300 text-sm"><span class="text-white font-bold">Interfaz Unificada:</span> Navegación consistente en toda la plataforma.</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="mt-1 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
+                            <i class="fas fa-check text-[10px] text-green-400"></i>
+                        </div>
+                        <p class="text-gray-300 text-sm"><span class="text-white font-bold">Rendimiento:</span> Optimización de carga inicial y modo offline mejorado.</p>
+                    </div>
+                </div>
+
+                <button onclick="closeUpdateModal()" class="w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-gray-200 transition-all active:scale-95 shadow-xl">
+                    ¡Entendido, vamos!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/evaluations/daily_retos.js"></script>
+    <script src="js/evaluations/init.js"></script>
+    <script src="js/evaluations/eval_01.js"></script>
+    <script src="js/evaluations/eval_02.js"></script>
+    <script src="js/evaluations/eval_03.js"></script>
+    <script src="js/evaluations/eval_04.js"></script>
+    <script src="js/evaluations/eval_05.js"></script>
+    <script src="js/evaluations/eval_06.js"></script>
+    <script src="js/evaluations/eval_07.js"></script>
+    <script src="js/evaluations/eval_08.js"></script>
+    <script src="js/evaluations/eval_09.js"></script>
+    <script src="js/evaluations/eval_10.js"></script>
+    <script src="js/evaluations/eval_11.js"></script>
+    <script src="js/evaluations/eval_12.js"></script>
+    <script src="js/evaluations/eval_13.js"></script>
+    <script src="js/evaluations/eval_14.js"></script>
+    <script src="js/evaluations/eval_15.js"></script>
+    <script src="js/evaluations/eval_16.js"></script>
+    <script src="js/evaluations/eval_17.js"></script>
+    <script src="js/evaluations/eval_18.js"></script>
+    <script src="js/evaluations/eval_19.js"></script>
+    <script src="js/evaluations/eval_20.js"></script>
+    <script src="js/evaluations/eval_21.js"></script>
+    <script src="js/evaluations/eval_22.js"></script>
+    <script src="js/evaluations/eval_23.js"></script>
+    <script src="js/evaluations/eval_24.js"></script>
+    <script src="js/evaluations/eval_25.js"></script>
+    <script src="js/evaluations/eval_26.js"></script>
+    <script src="js/evaluations/eval_27.js"></script>
+    <script src="js/evaluations/eval_28.js"></script>
+    <script src="js/evaluations/eval_secret.js"></script>
+    <script src="js/evaluations/app_eval.js"></script>
+
+    <script src="js/modules/init.js"></script>
+    <script src="js/modules/unit_00.js"></script>
+    <script src="js/modules/unit_01.js"></script>
+    <script src="js/modules/unit_02.js"></script>
+    <script src="js/modules/unit_03.js"></script>
+    <script src="js/modules/unit_04.js"></script>
+    <script src="js/modules/unit_05.js"></script>
+    <script src="js/modules/unit_06.js"></script>
+    <script src="js/modules/unit_07.js"></script>
+    <script src="js/modules/unit_08.js"></script>
+    <script src="js/modules/unit_09.js"></script>
+    <script src="js/modules/unit_10.js"></script>
+    <script src="js/modules/unit_11.js"></script>
+    <script src="js/modules/unit_12.js"></script>
+    <script src="js/modules/unit_13.js?v=3.0"></script>
+    <script src="js/app.js?v=3.2"></script>
+    <script>
+        function resetProgress() {
+            if (confirm('¿Estás seguro de que deseas reiniciar todo tu progreso? Esta acción eliminará tus ejercicios completados, medallas y rango.')) {
+                localStorage.removeItem('PyNeo-progress');
+                localStorage.removeItem('PyNeo-lesson-progress');
+                localStorage.removeItem('PyNeo-eval-progress');
+                localStorage.removeItem('PyNeo-user-color');
+                localStorage.removeItem('pyneo_chat_user');
+                window.location.reload();
+            }
+        }
+
+        function closeSuccessModal() {
+            const modal = document.getElementById('success-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('main-nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Initialize and sync user name/identity in header
+        function updateHeaderIdentity() {
+            let userName = localStorage.getItem('pyneo_chat_user');
+            const userColor = localStorage.getItem('PyNeo-user-color');
+            const display = document.getElementById('header-user-name');
+
+            // Generar nombre tipo Dev_1234 si no existe
+            if (!userName) {
+                const randomNumber = Math.floor(1000 + Math.random() * 9000);
+                userName = `Dev_${randomNumber}`;
+                localStorage.setItem('pyneo_chat_user', userName);
+            }
+
+            if (display) {
+                display.innerText = userName.toUpperCase();
+                // If user has earned a color (rank), apply it to look even more premium
+                if (userColor && userColor !== '#ffffff') {
+                    display.style.color = userColor;
+                    display.style.textShadow = `0 0 15px ${userColor}60`;
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updateHeaderIdentity);
+    </script>
+
+
+    <footer class="mt-20 py-10 border-t border-white/5 bg-black/40 backdrop-blur-sm relative">
+        <div class="absolute inset-0 bg-gradient-to-t from-neon-purple/5 to-transparent pointer-events-none"></div>
+        <div class="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+
+            <div class="text-center md:text-left">
+                <p class="text-gray-500 text-sm font-mono flex items-center gap-2 justify-center md:justify-start">
+                    &copy; 2026 <span class="text-white font-bold tracking-tight">PyNeo</span>
+                </p>
+                <p class="text-xs text-gray-600 mt-1">Hecho con <i
+                        class="fas fa-heart text-red-500 mx-1 animate-pulse"></i> por <a
+                        href="https://github.com/Neosowo" target="_blank"
+                        class="text-neon-green hover:underline">Erick</a></p>
+                <p class="text-[10px] text-gray-700 mt-3 font-mono uppercase tracking-widest">
+                    Última actualización: 23 Feb 2026
+                </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+
+                <a href="https://ko-fi.com/neosowo" target="_blank"
+                    class="group relative inline-flex items-center gap-3 px-6 py-3 bg-[#13C3FF]/10 hover:bg-[#13C3FF]/20 border border-[#13C3FF]/30 hover:border-[#13C3FF]/50 rounded-xl transition-all duration-300 hover:shadow-[0_0_20px_rgba(19,195,255,0.3)] hover:-translate-y-1">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-[#13C3FF]/0 via-[#13C3FF]/10 to-[#13C3FF]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer">
+                    </div>
+                    <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi" class="w-6 h-6 animate-bounce"
+                        style="animation-duration: 3s;">
+                    <span class="font-bold text-[#13C3FF] group-hover:text-white transition-colors">Invítame un
+                        café</span>
+                </a>
+
+                <button onclick="showDeunaQR()"
+                    class="group relative inline-flex items-center gap-3 px-6 py-3 bg-[#FFDD00]/10 hover:bg-[#FFDD00]/20 border border-[#FFDD00]/30 hover:border-[#FFDD00]/50 rounded-xl transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,221,0,0.3)] hover:-translate-y-1">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-[#FFDD00]/0 via-[#FFDD00]/10 to-[#FFDD00]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer">
+                    </div>
+                    <i class="fas fa-qrcode text-[#FFDD00] animate-pulse"></i>
+                    <span class="font-bold text-[#FFDD00] group-hover:text-white transition-colors">Donar con
+                        Deuna</span>
+                </button>
+            </div>
+
+            <div class="flex gap-6 opacity-80 text-gray-500 text-xs font-mono">
+                <div class="relative group/data">
+                    <button onclick="toggleDataMenu(event)"
+                        class="hover:text-primary transition-colors flex items-center gap-1">
+                        <i class="fas fa-file-export"></i> Datos
+                    </button>
+                    <div id="data-menu"
+                        class="hidden absolute bottom-full right-0 mb-4 w-48 neon-box p-2 shadow-2xl backdrop-blur-xl border border-white/10 z-[101]">
+                        <button onclick="exportProgress()"
+                            class="w-full text-left px-4 py-2 text-[10px] font-black tracking-widest hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2">
+                            <i class="fas fa-upload text-primary"></i> EXPORTAR
+                        </button>
+                        <button onclick="importProgressTrigger()"
+                            class="w-full text-left px-4 py-2 text-[10px] font-black tracking-widest hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2">
+                            <i class="fas fa-download text-neon-green"></i> IMPORTAR
+                        </button>
+                        <div class="h-px bg-white/5 my-1"></div>
+                        <button onclick="resetProgress()"
+                            class="w-full text-left px-4 py-2 text-[10px] font-black tracking-widest hover:bg-red-500/10 text-red-400/70 hover:text-red-500 rounded-lg transition-colors flex items-center gap-2">
+                            <i class="fas fa-redo-alt"></i> REINICIAR PROGRESO
+                        </button>
+                        <p class="px-4 py-1 text-[8px] text-gray-500 italic">Respalda tu progreso local</p>
+                    </div>
+                </div>
+                <input type="file" id="import-progress-file" class="hidden" accept=".pyn">
+                <a href="terms.html" class="hover:text-neon-green transition-colors">Términos</a>
+                <a href="privacy.html" class="hover:text-neon-green transition-colors">Privacidad</a>
+            </div>
+        </div>
+    </footer>
+
+
+
+
+
+    <div id="code-modal"
+        class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
+        <div
+            class="bg-[#1e1e2e] w-full max-w-3xl h-[80vh] rounded-xl border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-scale-up">
+
+            <div class="p-4 border-b border-white/10 flex justify-between items-center bg-[#27273a]">
+                <div class="flex items-center gap-2">
+                    <i class="fab fa-python text-neon-green text-xl"></i>
+                    <span class="font-bold text-white">Código</span>
+                </div>
+                <div class="flex gap-2">
+                    <button id="copy-modal-code"
+                        class="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2 border border-white/5">
+                        <i class="fas fa-copy"></i> <span id="copy-text">Copiar</span>
+                    </button>
+                    <button id="close-code-modal"
+                        class="text-gray-400 hover:text-white transition-colors p-1.5 hover:bg-white/10 rounded-lg">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-auto p-4 bg-[#09090b] scrollbar-thin scrollbar-thumb-gray-700">
+                <pre id="modal-code-content"
+                    class="text-sm font-mono text-gray-300 whitespace-pre-wrap leading-relaxed"></pre>
+            </div>
+        </div>
+    </div>
+
+    <div id="ranking-modal"
+        class="hidden fixed inset-0 z-[115] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
+        <div
+            class="bg-[#18181b] w-full max-w-md rounded-2xl border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-scale-up">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                        <i class="fas fa-trophy text-orange-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-white uppercase tracking-wider">Líderes de Racha</h3>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest">Top 10 Rachas Activas</p>
+                    </div>
+                </div>
+                <button onclick="closeRanking()" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            <div class="p-4 max-h-[60vh] overflow-y-auto scrollbar-thin" id="ranking-list">
+                <!-- Ranking items will be injected here -->
+            </div>
+
+            <!-- Reward Ad Section -->
+            <div class="p-4 bg-white/5 border-t border-white/10" id="ad-reward-container">
+                <div class="flex items-center justify-between mb-3 px-1">
+                    <span class="text-[10px] text-gray-500 uppercase tracking-widest font-black">Mis Protecciones</span>
+                    <div id="current-freezes-status" class="flex gap-1">
+                        <i class="fas fa-snowflake text-xs text-blue-400"></i>
+                        <span class="text-xs font-black text-white" id="modal-freeze-count">0/1</span>
+                    </div>
+                </div>
+
+                <button onclick="watchAdForFreeze()" id="btn-watch-ad"
+                    class="w-full group relative flex items-center justify-between p-4 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-xl transition-all duration-300">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-blue-400/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs font-black text-white uppercase tracking-wider">Protector Gratis</p>
+                            <p class="text-[10px] text-blue-400/80 font-bold uppercase tracking-widest">Mira un video
+                                corto</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-snowflake text-blue-400 animate-pulse"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ad-modal"
+        class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-md p-4">
+        <div
+            class="w-full max-w-md bg-[#09090b] rounded-2xl border border-white/10 flex flex-col overflow-hidden shadow-2xl">
+
+            <div class="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-white/5">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-snowflake text-blue-400 animate-pulse"></i>
+                    <span class="text-xs font-black text-white uppercase tracking-widest">Gana un Protector</span>
+                </div>
+                <span class="text-[10px] text-gray-500 font-mono" id="ad-countdown">Espera 15s...</span>
+            </div>
+
+            <div class="w-full flex items-center justify-center bg-black/40 min-h-[200px] p-3">
+                <ins class="adsbygoogle" style="display:block;width:100%;min-height:200px;"
+                    data-ad-client="ca-pub-8771484945698756" data-ad-slot="auto" data-ad-format="auto"
+                    data-full-width-responsive="true"></ins>
+            </div>
+
+            <div class="flex items-center justify-between px-5 py-3 border-t border-white/10 bg-white/5">
+                <p class="text-[10px] text-gray-600 uppercase tracking-widest">Mira el anuncio para ganar ❄️</p>
+                <button disabled id="btn-close-ad" onclick="closeAdWithReward()"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-gray-700 cursor-not-allowed transition-all text-xs font-black uppercase tracking-widest">
+                    <i class="fas fa-snowflake"></i> Reclamar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .animate-slide-up {
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes flame-glow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 2px #f97316);
+                transform: scale(1);
+            }
+
+            50% {
+                filter: drop-shadow(0 0 10px #fb923c);
+                transform: scale(1.1);
+            }
+        }
+
+        .animate-flame {
+            animation: flame-glow 1.5s infinite ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+    <div id="deuna-modal"
+        class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-md animate-fade-in p-4">
+        <div
+            class="bg-[#18181b] w-full max-w-sm rounded-2xl border border-[#FFDD00]/30 shadow-[0_0_50px_rgba(255,221,0,0.15)] overflow-hidden animate-scale-up">
+            <div class="p-6 text-center">
+                <div class="flex justify-between items-center mb-6">
+                    <span class="font-bold text-white uppercase tracking-wider text-sm">Donación con Deuna</span>
+                    <button onclick="closeDeunaQR()" class="text-gray-500 hover:text-white transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl mb-6 shadow-inner inline-block">
+                    <img src="js/media/qr.png" alt="Deuna QR" class="w-64 h-64 object-contain">
+                </div>
+
+                <div class="space-y-4">
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Escanea este código desde tu app <span class="text-[#FFDD00] font-bold">Deuna</span> para apoyar
+                        el proyecto. ¡Gracias!
+                    </p>
+
+                    <div class="relative py-4">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-white/5"></div>
+                        </div>
+                        <div
+                            class="relative flex justify-center text-[10px] uppercase tracking-widest text-gray-600 bg-[#18181b] px-2 font-black">
+                            ¿O prefieres ayudar compartiendo?</div>
+                    </div>
+
+                    <div class="flex justify-center gap-4 py-2">
+                        <button onclick="shareProject('whatsapp')"
+                            class="w-10 h-10 rounded-full bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white transition-all duration-300 flex items-center justify-center border border-[#25D366]/20"
+                            title="Compartir en WhatsApp">
+                            <i class="fab fa-whatsapp text-lg"></i>
+                        </button>
+                        <button onclick="shareProject('copy')" id="copy-link-btn"
+                            class="w-10 h-10 rounded-full bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white transition-all duration-300 flex items-center justify-center border border-blue-500/20"
+                            title="Copiar Enlace">
+                            <i class="fas fa-link text-lg"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-[10px] text-gray-500 italic pb-2">Compartir es gratis y me ayudaría a llegar a más
+                        personas :D</p>
+
+                    <button onclick="closeDeunaQR()"
+                        class="w-full py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all uppercase text-xs tracking-widest border border-white/10">
+                        Quizás más tarde
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDeunaQR() {
+            document.getElementById('deuna-modal').classList.remove('hidden');
+        }
+        function closeDeunaQR() {
+            document.getElementById('deuna-modal').classList.add('hidden');
+        }
+
+        // Update Modal Logic
+        function closeUpdateModal() {
+            const modal = document.getElementById('update-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            localStorage.setItem('PyNeo-update-v2.1.0', 'seen');
+        }
+
+        function checkUpdateModal() {
+            if (!localStorage.getItem('PyNeo-update-v2.1.0')) {
+                const modal = document.getElementById('update-modal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            }
+        }
+
+        function shareProject(platform) {
+            const url = window.location.href;
+            const text = "¡Mira esta plataforma gratuita para aprender Fundamentos de Programación!";
+
+            if (platform === 'whatsapp') {
+                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text + " " + url)}`, '_blank');
+            } else if (platform === 'copy') {
+                navigator.clipboard.writeText(url).then(() => {
+                    const btn = document.getElementById('copy-link-btn');
+                    const icon = btn.querySelector('i');
+                    const originalClass = icon.className;
+                    icon.className = 'fas fa-check text-lg';
+                    btn.classList.add('bg-green-500/20', 'text-green-400');
+
+                    setTimeout(() => {
+                        icon.className = originalClass;
+                        btn.classList.remove('bg-green-500/20', 'text-green-400');
+                    }, 2000);
+                });
+            }
+        }
+
+        // Trigger Update Modal
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(checkUpdateModal, 1500);
+        });
+    </script>
+
+    <script src="js/offline.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/streak.js"></script>
+    <script src="js/discord_promo.js"></script>
+</body>
+
 </html>

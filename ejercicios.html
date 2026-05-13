@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PyNeo — Repositorio de Ejercicios</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: { neo: '#5865F2' },
+      fontFamily: { mono: ['JetBrains Mono','Fira Code','monospace'] }
+    }
+  }
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ── Base ───────────────────────────────── */
+  * { font-family: 'Google Sans Code', 'Inter', sans-serif; }
+  body { 
+    background: #0c0c14; 
+    overflow-x: hidden;
+  }
+  .font-mono-code { font-family: 'Google Sans Code', monospace; }
+
+  /* ── Color principal: #5865F2 (morado-azul PyNeo) ── */
+  :root {
+    --neo: #5865F2;
+    --neo-rgb: 88,101,242;
+    --neo-dim: rgba(88,101,242,.12);
+    --neo-border: rgba(88,101,242,.35);
+  }
+
+  /* ── Header Fixed (Match Index) ── */
+  .nav-fixed {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    backdrop-filter: blur(16px);
+    transition: all 0.3s ease;
+  }
+  .nav-fixed.scrolled {
+    background: rgba(9, 9, 11, 0.7);
+    backdrop-filter: blur(24px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  .neon-box {
+    background: rgba(24, 24, 27, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    transition: all 0.2s;
+  }
+  .text-neon-green {
+    color: #818cf8 !important;
+    text-shadow: 0 0 25px rgba(99, 102, 241, 0.3);
+  }
+
+  /* ── Cards ── */
+  .ex-card {
+    opacity: 0;
+    transform: translateY(22px);
+    background: #111118;
+    border: 1px solid rgba(255,255,255,.055);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition:
+      border-color .3s ease,
+      box-shadow .3s ease,
+      transform .55s cubic-bezier(.22, 1, .36, 1);
+    display: flex; flex-direction: column; gap: .75rem;
+  }
+  .ex-card:hover {
+    border-color: var(--neo-border);
+    box-shadow: 0 0 32px rgba(var(--neo-rgb),.15), 0 0 0 1px rgba(var(--neo-rgb),.1);
+    transform: translateY(-5px) !important;
+  }
+
+  /* ── Badges de dificultad ── */
+  .badge-p { background:rgba(74,222,128,.1);  color:#4ade80; border:1px solid rgba(74,222,128,.22); }
+  .badge-i { background:rgba(234,179,8,.1);   color:#eab308; border:1px solid rgba(234,179,8,.22); }
+  .badge-a { background:rgba(239,68,68,.1);   color:#ef4444; border:1px solid rgba(239,68,68,.22); }
+  .badge-e { background:rgba(var(--neo-rgb),.12); color:var(--neo); border:1px solid rgba(var(--neo-rgb),.3); }
+
+  /* ── Q-HTML ── */
+  .q-html h4 { display:none; }
+  .q-html p  { font-size:.875rem; color:#d1d5db; margin-bottom:.5rem; line-height:1.65; }
+  .q-html ul { list-style:disc; padding-left:1.2rem; color:#9ca3af; font-size:.8rem; margin-bottom:.5rem; }
+  .q-html li { margin-bottom:.2rem; }
+  .q-html code { background:#16172a; color:var(--neo); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:.78em; }
+  .q-html strong, .q-html b { color:#e5e7eb; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar{width:5px}
+  ::-webkit-scrollbar-track{background:#0d0d14}
+  ::-webkit-scrollbar-thumb{background:var(--neo);border-radius:5px}
+
+  /* ── Search ── */
+  #search-box:focus { outline:none; border-color:rgba(var(--neo-rgb),.5); box-shadow:0 0 0 2px rgba(var(--neo-rgb),.12); }
+
+  /* ── Filter buttons ── */
+  .filter-btn {
+    transition: all .22s cubic-bezier(.4,0,.2,1);
+    position: relative; overflow: hidden;
+  }
+  .filter-btn::after {
+    content:''; position:absolute; inset:0;
+    background: var(--neo-dim); opacity:0; transition:opacity .2s;
+  }
+  .filter-btn:hover::after { opacity:1; }
+  .filter-btn.active {
+    background: var(--neo-dim);
+    border-color: var(--neo-border);
+    color: var(--neo);
+    box-shadow: 0 0 18px rgba(var(--neo-rgb),.18);
+  }
+
+  /* ── Header line ── */
+  .header-line {
+    background: linear-gradient(90deg, transparent, var(--neo), transparent);
+    height: 1px; opacity: .3;
+  }
+
+  /* ── Stat pill ── */
+  .stat-pill {
+    background: rgba(var(--neo-rgb),.08);
+    border: 1px solid rgba(var(--neo-rgb),.25);
+    color: var(--neo);
+    font-size:.7rem; padding:.35rem .9rem;
+    border-radius:999px; letter-spacing:.05em;
+  }
+
+  /* ── Spinner ── */
+  @keyframes spin360 { to{transform:rotate(360deg)} }
+  .ring { animation: spin360 1s linear infinite; }
+
+  /* ── Modal ── */
+  #modal-inner { transition: none; }
+</style>
+</head>
+<body class="min-h-screen text-gray-200 relative">
+
+<!-- Fondo Effects -->
+
+
+<!-- ══ HEADER ══════════════════════════════════════════════ -->
+<header id="main-nav" class="nav-fixed">
+  <div class="max-w-7xl mx-auto px-6 py-4">
+    <div class="flex items-center justify-between gap-4">
+      <!-- Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.href='index.html'">
+        <img src="https://neosowo.github.io/PyNeo/js/media/favicon.png" width="32" height="32" class="">
+        <div class="flex flex-col">
+          <h1 class="text-2xl font-black tracking-tight text-white">
+            PyNeo
+          </h1>
+        </div>
+        <span class="hidden lg:inline text-gray-600 text-[10px] ml-1 uppercase tracking-widest font-bold">/ Repositorio</span>
+      </div>
+
+      <!-- Search (Central) -->
+      <div class="flex-1 max-w-md hidden md:block">
+        <div class="relative">
+          <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-xs"></i>
+          <input id="search-box" type="text" placeholder="Buscar ejercicio..."
+            class="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-neo/50 transition-all"
+            oninput="applyFilters()">
+        </div>
+      </div>
+
+      <!-- Stats & User -->
+      <div class="flex items-center gap-3">
+        <!-- Last Update (New) -->
+        <div class="hidden xl:flex flex-col items-end mr-2">
+          <span class="text-[8px] text-gray-600 uppercase tracking-tighter">Última actualización</span>
+          <span class="text-[10px] text-gray-400 font-bold">13 Mayo, 2024</span>
+        </div>
+
+        <!-- Stat Pill -->
+        <span id="stat-total" class="hidden sm:flex stat-pill flex-shrink-0">— ejercicios</span>
+        
+        <!-- User -->
+        <div class="hidden sm:flex items-center gap-3 neon-box px-4 py-2">
+          <span class="text-[10px] font-bold text-gray-400">USUARIO</span>
+          <span class="text-sm font-black text-neon-green" id="header-user-name">...</span>
+        </div>
+
+        <!-- Streak -->
+        <div class="flex items-center gap-2 neon-box px-4 py-2 cursor-pointer hover:bg-white/5 transition-all" id="streak-container">
+          <span class="text-sm font-black text-white" id="header-streak-count">0</span>
+          <i class="fas fa-fire text-gray-500 text-sm"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══ FILTROS ══════════════════════════════════════════════ -->
+<div id="filters-wrap" class="max-w-7xl mx-auto px-4 mt-32 mb-6 flex flex-col gap-3">
+  <!-- Fuente -->
+  <div class="flex flex-wrap gap-2">
+    <button onclick="setSource('eval')"  data-src="eval"
+      class="filter-btn active text-xs px-4 py-1.5 rounded-full border border-white/15 text-gray-400">
+      Evaluaciones
+    </button>
+    <button onclick="setSource('daily')" data-src="daily"
+      class="filter-btn text-xs px-4 py-1.5 rounded-full border border-white/15 text-gray-400">
+      Retos Simples
+    </button>
+  </div>
+  <!-- Dificultad -->
+  <div id="diff-row" class="flex flex-wrap gap-2">
+    <button onclick="setDiff('all')"          data-diff="all"
+      class="diff-btn filter-btn active text-xs px-4 py-1.5 rounded-full border border-white/15 text-gray-400">Todos</button>
+    <button onclick="setDiff('principiante')" data-diff="principiante"
+      class="diff-btn filter-btn text-xs px-4 py-1.5 rounded-full border border-green-500/25 text-green-400">Principiante</button>
+    <button onclick="setDiff('intermedio')"   data-diff="intermedio"
+      class="diff-btn filter-btn text-xs px-4 py-1.5 rounded-full border border-yellow-500/25 text-yellow-400">Intermedio</button>
+    <button onclick="setDiff('avanzado')"     data-diff="avanzado"
+      class="diff-btn filter-btn text-xs px-4 py-1.5 rounded-full border border-red-500/25 text-red-400">Avanzado</button>
+    <button onclick="setDiff('experto')"      data-diff="experto"
+      class="diff-btn filter-btn text-xs px-4 py-1.5 rounded-full"
+      style="border:1px solid rgba(88,101,242,.3);color:var(--neo)">Experto</button>
+  </div>
+</div>
+
+<!-- ══ GRID ═════════════════════════════════════════════════ -->
+<main class="max-w-7xl mx-auto px-4 pb-24 relative z-10">
+  <div id="loading" class="flex flex-col items-center py-28 gap-4">
+    <div class="w-10 h-10 border-2 rounded-full ring"
+         style="border-color:rgba(88,101,242,.2);border-top-color:var(--neo)"></div>
+    <p class="text-gray-600 text-sm">Cargando ejercicios...</p>
+  </div>
+  <div id="grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 hidden"></div>
+  <div id="empty" class="hidden flex-col items-center py-28 gap-3 text-center">
+    <i class="fas fa-ghost text-5xl text-gray-800"></i>
+    <p class="text-gray-600 text-sm">Sin resultados.</p>
+    <button onclick="resetAll()" class="text-xs mt-1 transition-colors"
+      style="color:rgba(88,101,242,.7)" onmouseover="this.style.color='var(--neo)'" onmouseout="this.style.color='rgba(88,101,242,.7)'">
+      Limpiar filtros
+    </button>
+  </div>
+</main>
+
+<!-- ══ MODAL ════════════════════════════════════════════════ -->
+<div id="modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4"
+     style="background:rgba(0,0,0,.88);backdrop-filter:blur(6px)">
+  <div id="modal-inner" class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
+       style="background:#111118;border:1px solid rgba(88,101,242,.2);opacity:0;transform:scale(.92) translateY(20px)">
+    <!-- Cabecera -->
+    <div class="sticky top-0 border-b border-white/5 px-6 py-4 flex items-start justify-between gap-4"
+         style="background:#111118">
+      <div class="flex items-center gap-3 min-w-0">
+        <div id="modal-icon-wrap" class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+             style="background:rgba(88,101,242,.12)">
+          <i id="modal-icon" class="text-base" style="color:var(--neo)"></i>
+        </div>
+        <div class="min-w-0">
+          <p id="modal-eval" class="text-[10px] text-gray-600 uppercase tracking-widest truncate"></p>
+          <h2 id="modal-title" class="text-white font-bold text-base leading-tight"></h2>
+        </div>
+      </div>
+      <button onclick="closeModal()"
+        class="text-gray-600 hover:text-white w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors">
+        <i class="fas fa-times text-sm"></i>
+      </button>
+    </div>
+    <!-- Contenido -->
+    <div class="px-6 py-5 space-y-5">
+      <div id="modal-body" class="q-html"></div>
+      <div class="rounded-xl p-4" style="background:#0c0c14;border:1px solid rgba(88,101,242,.18)">
+        <p class="text-[10px] uppercase tracking-widest mb-2 font-bold" style="color:rgba(88,101,242,.55)">Salida Esperada</p>
+        <pre id="modal-out-text" class="font-mono text-sm whitespace-pre-wrap leading-relaxed" style="color:var(--neo)"></pre>
+      </div>
+      <!-- Soluciones -->
+      <div id="solution-section" class="pt-2">
+        <!-- Botón Solución Oficial (dinámico) -->
+        <div id="sol-official-wrap" class="hidden">
+           <a id="sol-official-btn" href="#" target="_blank" 
+              class="w-full bg-[#5865F2] hover:bg-[#4338ca] text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#5865F2]/20">
+             <i class="fas fa-external-link-alt"></i> Ver Solución
+           </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DATOS ════════════════════════════════════════════════ -->
+<script src="js/evaluations/daily_retos.js"></script>
+<script src="js/evaluations/init.js"></script>
+<script src="js/evaluations/eval_01.js"></script>
+<script src="js/evaluations/eval_02.js"></script>
+<script src="js/evaluations/eval_03.js"></script>
+<script src="js/evaluations/eval_04.js"></script>
+<script src="js/evaluations/eval_05.js"></script>
+<script src="js/evaluations/eval_06.js"></script>
+<script src="js/evaluations/eval_07.js"></script>
+<script src="js/evaluations/eval_08.js"></script>
+<script src="js/evaluations/eval_09.js"></script>
+<script src="js/evaluations/eval_10.js"></script>
+<script src="js/evaluations/eval_11.js"></script>
+<script src="js/evaluations/eval_12.js"></script>
+<script src="js/evaluations/eval_13.js"></script>
+<script src="js/evaluations/eval_14.js"></script>
+<script src="js/evaluations/eval_15.js"></script>
+<script src="js/evaluations/eval_16.js"></script>
+<script src="js/evaluations/eval_17.js"></script>
+<script src="js/evaluations/eval_18.js"></script>
+<script src="js/evaluations/eval_19.js"></script>
+<script src="js/evaluations/eval_20.js"></script>
+<script src="js/evaluations/eval_21.js"></script>
+<script src="js/evaluations/eval_22.js"></script>
+<script src="js/evaluations/eval_23.js"></script>
+<script src="js/evaluations/eval_24.js"></script>
+<script src="js/evaluations/eval_25.js"></script>
+<script src="js/evaluations/eval_26.js"></script>
+<script src="js/evaluations/eval_27.js"></script>
+<script src="js/evaluations/eval_28.js"></script>
+<script src="js/evaluations/eval_secret.js"></script>
+<script src="js/evaluations/app_eval.js"></script>
+
+<script>
+let allCards     = [];
+let activeSource = 'eval';
+let activeDiff   = 'all';
+
+// ── Dificultades ocultas (nunca se muestran) ─────────────
+const HIDDEN_DIFFICULTIES = new Set(['veterano', 'oculto', 'master', 'máster']);
+
+// ── GSAP: animaciones de entrada ─────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  gsap.to('#site-header',   { opacity:1, y:0, duration:.75, ease:'power3.out' });
+  gsap.to('#filters-wrap',  { opacity:1, y:0, duration:.65, delay:.18, ease:'power3.out' });
+});
+
+// ── Badge class ──────────────────────────────────────────
+function badgeClass(d) {
+  return { principiante:'badge-p', intermedio:'badge-i',
+           avanzado:'badge-a', experto:'badge-e' }[d] || 'badge-p';
+}
+
+// ── Build cards ──────────────────────────────────────────
+function buildCards() {
+  allCards = [];
+
+  (window.evaluations || []).filter(Boolean).forEach(ev => {
+    const diff = (ev.difficulty || '').toLowerCase();
+    if (HIDDEN_DIFFICULTIES.has(diff)) return;   // ← ocultar evaluación completa
+
+    (ev.questions || []).forEach((q, qi) => {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = q.question || '';
+      const h4 = tmp.querySelector('h4');
+      const qTitle = h4 ? h4.innerText.replace(/^\d+\.\s*/,'').trim() : `Pregunta ${qi+1}`;
+
+      allCards.push({
+        source: 'eval',
+        evalTitle: ev.title,
+        evalId: ev.id,
+        difficulty: diff,
+        icon: ev.icon || 'fa-code',
+        qIndex: qi+1,
+        qTotal: (ev.questions||[]).length,
+        title: qTitle,
+        bodyHTML: q.question || '',
+        expectedOutput: q.expectedOutput || '',
+        solutionUrl: q.solutionUrl || null, // ← capturar del objeto
+      });
+    });
+  });
+
+  (window.dailyChallenges || []).forEach(ch => {
+    (ch.questions||[]).forEach((q, qi) => {
+      allCards.push({
+        source: 'daily',
+        evalTitle: ch.title,
+        evalId: ch.id,
+        difficulty: 'simple',
+        icon: ch.icon || 'fa-star',
+        qIndex: qi+1,
+        qTotal: (ch.questions||[]).length,
+        title: ch.title,
+        bodyHTML: q.question || '',
+        expectedOutput: q.expectedOutput || '',
+        solutionUrl: q.solutionUrl || null, // ← capturar
+      });
+    });
+  });
+}
+
+// ── Render ───────────────────────────────────────────────
+function render(cards) {
+  const grid    = document.getElementById('grid');
+  const empty   = document.getElementById('empty');
+  const loading = document.getElementById('loading');
+
+  loading.classList.add('hidden');
+
+  if (!cards.length) {
+    grid.classList.add('hidden');
+    empty.classList.remove('hidden'); empty.classList.add('flex');
+    return;
+  }
+  empty.classList.add('hidden'); empty.classList.remove('flex');
+  grid.classList.remove('hidden');
+  grid.innerHTML = '';
+
+  cards.forEach(c => {
+    const isDaily = c.source === 'daily';
+    const bc = isDaily ? '' : badgeClass(c.difficulty);
+
+    const tmp2 = document.createElement('div');
+    tmp2.innerHTML = c.bodyHTML;
+    const preview = (tmp2.innerText||'').trim().replace(/\s+/g,' ').slice(0,110);
+
+    const card = document.createElement('div');
+    card.className = 'ex-card';
+    card.onclick = () => openModal(c);
+
+    card.innerHTML = `
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+               style="background:rgba(88,101,242,.1);border:1px solid rgba(88,101,242,.18)">
+            <i class="fas ${c.icon} text-[10px]" style="color:rgba(88,101,242,.7)"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] text-gray-600 uppercase tracking-wider truncate">
+              ${isDaily ? 'Reto Simple' : `Eval #${c.evalId}`} &middot; ${c.qIndex}/${c.qTotal}
+            </p>
+            <p class="text-[11px] text-gray-500 truncate">${c.evalTitle}</p>
+          </div>
+        </div>
+        ${!isDaily ? `<span class="${bc} text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize flex-shrink-0">${c.difficulty}</span>` : ''}
+      </div>
+
+      <h3 class="text-white font-semibold text-sm leading-snug line-clamp-2">${c.title}</h3>
+
+      <p class="text-gray-600 text-xs leading-relaxed line-clamp-3 flex-1">
+        ${preview}${preview.length>=110?'...':''}
+      </p>
+
+      <div class="flex justify-end pt-2" style="border-top:1px solid rgba(255,255,255,.04)">
+        <span class="text-xs flex items-center gap-1 transition-colors"
+              style="color:rgba(88,101,242,.45)"
+              onmouseover="this.style.color='var(--neo)'" onmouseout="this.style.color='rgba(88,101,242,.45)'">
+          Ver enunciado <i class="fas fa-arrow-right text-[9px]"></i>
+        </span>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  // GSAP stagger de entrada
+  gsap.to('.ex-card', {
+    opacity: 1, y: 0,
+    duration: .5,
+    stagger: .04,
+    ease: 'power3.out',
+    clearProps: 'transform',
+  });
+
+  document.getElementById('stat-total').textContent = `${cards.length} ejercicios`;
+}
+
+// ── Filtros ──────────────────────────────────────────────
+function applyFilters() {
+  const q = (document.getElementById('search-box').value||'').toLowerCase().trim();
+  let filtered = allCards;
+
+  if (activeSource !== 'all')
+    filtered = filtered.filter(c => c.source === activeSource);
+  if (activeDiff !== 'all' && activeSource !== 'daily')
+    filtered = filtered.filter(c => c.difficulty === activeDiff);
+  if (q) filtered = filtered.filter(c => {
+    const tmp = document.createElement('div'); tmp.innerHTML = c.bodyHTML;
+    return (tmp.innerText + c.evalTitle + c.title).toLowerCase().includes(q);
+  });
+
+  render(filtered);
+}
+
+function setSource(src) {
+  activeSource = src;
+  document.getElementById('diff-row').style.display = (src === 'daily') ? 'none' : '';
+  if (src === 'daily') { activeDiff = 'all'; resetDiffBtns(); }
+  document.querySelectorAll('[data-src]').forEach(b =>
+    b.classList.toggle('active', b.dataset.src === src));
+  applyFilters();
+}
+
+function setDiff(d) {
+  activeDiff = d;
+  resetDiffBtns();
+  document.querySelector(`[data-diff="${d}"]`)?.classList.add('active');
+  applyFilters();
+}
+
+function resetDiffBtns() {
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+}
+
+function resetAll() {
+  document.getElementById('search-box').value = '';
+  activeSource = 'eval'; activeDiff = 'all';
+  document.querySelectorAll('[data-src]').forEach(b =>
+    b.classList.toggle('active', b.dataset.src === 'eval'));
+  resetDiffBtns();
+  document.querySelector('[data-diff="all"]')?.classList.add('active');
+  document.getElementById('diff-row').style.display = '';
+  applyFilters();
+}
+
+// ── Modal ────────────────────────────────────────────────
+function openModal(c) {
+  const isDaily = c.source === 'daily';
+
+  document.getElementById('modal-eval').textContent =
+    (isDaily ? 'Reto Simple' : `Evaluacion #${c.evalId}`) + ' — ' + c.evalTitle;
+  document.getElementById('modal-title').textContent = c.title;
+  document.getElementById('modal-icon').className = `fas ${c.icon} text-base`;
+
+  const body = document.getElementById('modal-body');
+  body.innerHTML = isDaily
+    ? `<p class="text-gray-300 text-sm leading-relaxed">${c.bodyHTML}</p>`
+    : c.bodyHTML;
+
+  document.getElementById('modal-out-text').textContent = c.expectedOutput || '—';
+
+  // Solución (se muestra solo si existe en el bundle)
+  const solWrap = document.getElementById('sol-official-wrap');
+  const solBtn = document.getElementById('sol-official-btn');
+  if (c.solutionUrl) {
+    solBtn.href = c.solutionUrl;
+    solWrap.classList.remove('hidden');
+  } else {
+    solWrap.classList.add('hidden');
+  }
+
+  const m = document.getElementById('modal');
+  m.classList.remove('hidden'); m.classList.add('flex');
+
+  gsap.fromTo('#modal-inner',
+    { scale:.92, opacity:0, y:22 },
+    { scale:1, opacity:1, y:0, duration:.42, ease:'back.out(1.5)' }
+  );
+}
+
+function closeModal() {
+  gsap.to('#modal-inner', {
+    scale:.94, opacity:0, y:10, duration:.24, ease:'power2.in',
+    onComplete: () => {
+      const m = document.getElementById('modal');
+      m.classList.add('hidden'); m.classList.remove('flex');
+    }
+  });
+}
+
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ── Navigation & Identity ────────────────────────────────
+function updateHeaderIdentity() {
+  let userName = localStorage.getItem('pyneo_chat_user');
+  const userColor = localStorage.getItem('PyNeo-user-color');
+  const display = document.getElementById('header-user-name');
+
+  // Generar nombre tipo Dev_1234 si no existe
+  if (!userName) {
+    const randomNumber = Math.floor(1000 + Math.random() * 9000);
+    userName = `Dev_${randomNumber}`;
+    localStorage.setItem('pyneo_chat_user', userName);
+  }
+
+  if (display) {
+    display.innerText = userName.toUpperCase();
+    if (userColor && userColor !== '#ffffff' && userColor !== 'glitch-effect') {
+      display.style.color = userColor;
+    }
+  }
+}
+
+function updateDailyChallengeUI() {
+  const saved = localStorage.getItem('PyNeo-daily-challenge');
+  let challenge = { count: 0, lastUpdate: null };
+  try { if (saved) challenge = JSON.parse(saved); } catch (e) {}
+  
+  const countEl = document.getElementById('header-streak-count');
+  const container = document.getElementById('streak-container');
+  if (countEl) countEl.innerText = challenge.count;
+
+  if (container) {
+    const now = new Date();
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Guayaquil' }).format(now);
+    const icon = container.querySelector('i');
+    
+    if (challenge.lastUpdate === today) {
+      container.classList.add('opacity-100');
+      if (icon) {
+        icon.className = 'fas fa-fire text-sm text-orange-500 animate-pulse';
+        icon.style.filter = 'drop-shadow(0 0 8px rgba(249,115,22,0.6))';
+      }
+    } else {
+      container.classList.add('opacity-50');
+    }
+  }
+}
+
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('main-nav');
+  if (window.scrollY > 50) {
+    nav.classList.add('scrolled');
+  } else {
+    nav.classList.remove('scrolled');
+  }
+});
+
+// ── Init ─────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  buildCards();
+  applyFilters();
+  updateHeaderIdentity();
+  updateDailyChallengeUI();
+});
+</script>
+</body>
+</html>
